@@ -1,0 +1,87 @@
+console_title_template = '{{ .Shell }} in {{ .Folder }}'
+version = 3
+final_space = true
+
+[upgrade]
+  source = 'cdn'
+  interval = '168h'
+  auto = false
+  notice = false
+
+[palette]
+  black = '#282a36'
+  red = '#ff5c57'
+  green = '#5af78e'
+  yellow = '#f3f99d'
+  blue = '#57c7ff'
+  magenta = '#ff6ac1'
+  cyan = '#9aedfe'
+  white = '#f1f1f0'
+  grey = '#6c6c6c'
+
+[[blocks]]
+  type = 'rprompt'
+  overflow = 'hidden'
+
+  [[blocks.segments]]
+    type = 'python'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'p:grey'
+    template = ' ({{ .Venv }})'
+    display_mode = 'always'
+
+  [[blocks.segments]]
+    type = 'text'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'transparent'
+    foreground_templates = [
+      "{{if gt .Code 0}}p:red{{end}}"
+    ]
+    template = ' Exit {{ .Code }}'
+
+
+[[blocks]]
+  type = 'prompt'
+  alignment = 'left'
+  newline = true
+
+  [[blocks.segments]]
+    type = "root"
+    style = "plain"
+    background = 'transparent'
+    foreground = "p:yellow"
+    template = "\uF0E7"
+
+  [[blocks.segments]]
+    type = 'path'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'p:blue'
+    template = '{{ .Path }}'
+
+    [blocks.segments.properties]
+      style = 'folder'
+
+  [[blocks.segments]]
+    type = 'git'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'p:grey'
+    foreground_templates = [
+      "{{ if or (.Working.Changed) (.Staging.Changed) }}p:yellow{{ end }}",
+    ]
+    template = ' {{ .HEAD }}'
+
+    [blocks.segments.properties]
+      branch_icon = ''
+      fetch_status = true
+      source = "cli"
+
+  [[blocks.segments]]
+    type = 'text'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'p:magenta'
+    template = ' ❯'
