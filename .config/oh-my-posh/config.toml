@@ -79,6 +79,13 @@ final_space = true
       style = 'folder'
 
   [[blocks.segments]]
+    type = "session"
+    style = "plain"
+    background = 'transparent'
+    foreground = "p:yellow"
+    template = "{{ if .SSHSession }} {{ end }}"
+
+  [[blocks.segments]]
     type = 'os'
     style = 'plain'
     background = 'transparent'
