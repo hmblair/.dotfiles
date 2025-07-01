@@ -14,6 +14,14 @@ autoload -Uz compinit
 compinit
 zstyle ':completion:*:*:argument*' tag-order - '! urls'
 
+# Syntax highlighting
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
 # Advanced autocomplete settings
 
 HISTFILE=~/.zhistory
