@@ -1,5 +1,6 @@
 #!/bin/zsh
 
+export PATH=$PATH:~/.local/bin
 source ~/.config/zsh/funcs
 
 # Init oh-my-posh
