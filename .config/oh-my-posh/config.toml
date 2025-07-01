@@ -24,6 +24,21 @@ final_space = true
   overflow = 'hidden'
 
   [[blocks.segments]]
+    type = 'git'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'p:grey'
+    foreground_templates = [
+      "{{ if or (.Working.Changed) (.Staging.Changed) }}p:yellow{{ end }}",
+    ]
+    template = ' {{ .HEAD }}'
+
+    [blocks.segments.properties]
+      branch_icon = ''
+      fetch_status = true
+      source = "cli"
+
+  [[blocks.segments]]
     type = 'python'
     style = 'plain'
     background = 'transparent'
@@ -40,7 +55,6 @@ final_space = true
       "{{if gt .Code 0}}p:red{{end}}"
     ]
     template = ' Exit {{ .Code }}'
-
 
 [[blocks]]
   type = 'prompt'
@@ -65,23 +79,8 @@ final_space = true
       style = 'folder'
 
   [[blocks.segments]]
-    type = 'git'
-    style = 'plain'
-    background = 'transparent'
-    foreground = 'p:grey'
-    foreground_templates = [
-      "{{ if or (.Working.Changed) (.Staging.Changed) }}p:yellow{{ end }}",
-    ]
-    template = ' {{ .HEAD }}'
-
-    [blocks.segments.properties]
-      branch_icon = ''
-      fetch_status = true
-      source = "cli"
-
-  [[blocks.segments]]
-    type = 'text'
+    type = 'os'
     style = 'plain'
     background = 'transparent'
     foreground = 'p:magenta'
-    template = ' ❯'
+    template = ' {{ if .WSL }}WSL at {{ end }}{{.Icon}} ❯'
