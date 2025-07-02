@@ -1,0 +1,23 @@
+color:
+  when: auto
+  theme: custom
+size: default
+total-size: true
+indicators: false
+no-symlink: false
+icons:
+  when: always
+date: relative
+layout: tree
+recursion:
+  enabled: true
+  depth: 1
+blocks:
+  - permission
+  - user
+  - size
+  - date
+  - name
+symlink-arrow: 
+ignore-globs:
+  - __pycache__
