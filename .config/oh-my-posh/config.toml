@@ -54,7 +54,7 @@ final_space = true
     foreground_templates = [
       "{{if gt .Code 0}}p:red{{end}}"
     ]
-    template = ' Exit {{ .Code }}'
+    template = '  Exit {{ .Code }}'
 
 [[blocks]]
   type = 'prompt'
@@ -67,16 +67,6 @@ final_space = true
     background = 'transparent'
     foreground = "p:yellow"
     template = "\uF0E7"
-
-  [[blocks.segments]]
-    type = 'path'
-    style = 'plain'
-    background = 'transparent'
-    foreground = 'p:blue'
-    template = '{{ .Path }}'
-
-    [blocks.segments.properties]
-      style = 'folder'
 
   [[blocks.segments]]
     type = "session"

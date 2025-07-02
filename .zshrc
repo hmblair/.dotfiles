@@ -36,4 +36,4 @@ setopt hist_verify
 bindkey "^[[A" history-search-backward
 bindkey "^[[B" history-search-forward
 
-alias ls="lsd"
+alias ls="lsd \$(pwd)"
