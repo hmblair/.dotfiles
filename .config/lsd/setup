@@ -32,6 +32,5 @@ function ls {
     COMMAND+=" ${FLAGS:1}"
   fi
   COMMAND+=" $ARGS | grep --color=auto -E \". $VAR|$\""
-  echo "$COMMAND"
   eval "$COMMAND"
 }
