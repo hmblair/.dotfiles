@@ -2,7 +2,7 @@
 
 # Ensure files and folders are not bold
 
-export LS_COLORS="di=34:ex=32"
+export LS_COLORS="di=34:bd=37:cd=37:ex=32:ln=36:tw=35:ow=35:su=31:sg=31"
 
 # Highlight the current folder and expand relative paths
 
