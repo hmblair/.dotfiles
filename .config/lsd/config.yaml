@@ -1,5 +1,5 @@
 color:
-  when: auto
+  when: always
   theme: custom
 size: default
 total-size: true
@@ -19,5 +19,3 @@ blocks:
   - date
   - name
 symlink-arrow: 
-ignore-globs:
-  - __pycache__
