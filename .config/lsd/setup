@@ -31,6 +31,6 @@ function ls {
   if [ ! -z $FLAGS ]; then
     COMMAND+=" ${FLAGS:1}"
   fi
-  COMMAND+=" $ARGS | grep --color=auto -E \". $VAR|$\""
+  COMMAND+=" $ARGS | grep --color=auto -E '. ${VAR}.{5}\$|\$'"
   eval "$COMMAND"
 }
