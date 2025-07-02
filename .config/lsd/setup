@@ -28,9 +28,10 @@ function ls {
     ARGS=$(readlink -f ${ARGS:1})
   fi
   COMMAND="lsd"
-  if [ ! -z $ARGS ]; then
-    COMMAND+=" ${FLAGS:1} "
+  if [ ! -z $FLAGS ]; then
+    COMMAND+=" ${FLAGS:1}"
   fi
-  COMMAND+="$ARGS | grep --color=auto -E \". $VAR|$\""
+  COMMAND+=" $ARGS | grep --color=auto -E \". $VAR|$\""
+  echo "$COMMAND"
   eval "$COMMAND"
 }
