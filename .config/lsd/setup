@@ -1,0 +1,36 @@
+#!/bin/zsh
+
+# Ensure files and folders are not bold
+
+export LS_COLORS="di=34:ex=32"
+
+# Highlight the current folder and expand relative paths
+
+function ls {
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    export GREP_COLOR='1;33'
+  else
+    export GREP_COLORS='ms=1;33'
+  fi
+  VAR="$(basename $(pwd))"
+  FLAGS=""
+  ARGS=""
+  for arg in "$@"; do
+    if [[ "$arg" == *"."* ]]; then
+      ARGS="$ARGS $arg"
+    else
+      FLAGS="$FLAGS $arg"
+    fi
+  done
+  if [ -z $ARGS ]; then
+    ARGS=$(pwd)
+  else
+    ARGS=$(readlink -f ${ARGS:1})
+  fi
+  COMMAND="lsd"
+  if [ ! -z $ARGS ]; then
+    COMMAND+=" ${FLAGS:1} "
+  fi
+  COMMAND+="$ARGS | grep --color=auto -E \". $VAR|$\""
+  eval "$COMMAND"
+}

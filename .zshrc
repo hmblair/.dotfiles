@@ -2,6 +2,7 @@
 
 export PATH=$PATH:~/.local/bin
 source ~/.config/zsh/funcs
+source ~/.config/lsd/setup
 
 # Init oh-my-posh
 
