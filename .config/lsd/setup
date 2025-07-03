@@ -12,25 +12,29 @@ function ls {
   else
     export GREP_COLORS='ms=1;33'
   fi
-  VAR="$(basename $(pwd))"
+  GREP_VAR="$(basename $(pwd))"
   FLAGS=""
   ARGS=""
   for arg in "$@"; do
-    if [[ "$arg" == *"."* ]]; then
-      ARGS="$ARGS $arg"
-    else
+    if [[ $arg =~ ^- || $arg =~ ^[0-9]+$ ]]; then
       FLAGS="$FLAGS $arg"
+    else
+      ARGS="$ARGS $arg"
     fi
   done
   if [ -z $ARGS ]; then
-    ARGS=$(pwd)
+    FINAL_ARGS=$(pwd)
   else
-    ARGS=$(readlink -f ${ARGS:1})
+    FINAL_ARGS=$(readlink -f $(echo ${ARGS:1}) | tr '\n' ' ')
+    if [ -z $FINAL_ARGS ]; then
+      return $(/bin/ls ${ARGS:1})
+    fi
+    FINAL_ARGS=${FINAL_ARGS::-1}
   fi
   COMMAND="lsd"
   if [ ! -z $FLAGS ]; then
     COMMAND+=" ${FLAGS:1}"
   fi
-  COMMAND+=" $ARGS | grep --color=auto -E '. ${VAR}.{5}\$|\$'"
+  COMMAND+=" $FINAL_ARGS | grep --color=auto -E '. ${GREP_VAR}.{5}\$|\$'"
   eval "$COMMAND"
 }
