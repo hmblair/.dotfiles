@@ -24,17 +24,48 @@ final_space = true
   overflow = 'hidden'
 
   [[blocks.segments]]
+    type = 'text'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'transparent'
+    foreground_templates = [
+      "{{if gt .Code 0}}p:red{{end}}"
+    ]
+    template = ' Exit {{ .Code }} '
+
+  [[blocks.segments]]
     type = 'git'
     style = 'plain'
     background = 'transparent'
-    foreground = 'p:grey'
+    foreground = 'p:white'
     foreground_templates = [
-      "{{ if or (.Working.Changed) (.Staging.Changed) }}p:yellow{{ end }}",
+      "{{ if or (gt .Ahead 0) (gt .Behind 0) }}p:red{{ end }}",
     ]
-    template = ' {{ .HEAD }}'
+    template = '{{ .UpstreamIcon }}'
 
     [blocks.segments.properties]
-      branch_icon = ''
+      fetch_upstream_icon = true
+      source = "cli"
+
+  [[blocks.segments]]
+    type = 'git'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'p:green'
+    template = '{{ if and (not .Working.Changed) (not .Staging.Changed) }} 󰄬{{ end }}'
+
+    [blocks.segments.properties]
+      fetch_status = true
+      source = "cli"
+
+  [[blocks.segments]]
+    type = 'git'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'p:yellow'
+    template = '{{ if .Working.Changed }}  {{ .Working.Modified }}{{ end }}{{ if .Staging.Changed }}  {{ .Staging.Modified }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }}'
+
+    [blocks.segments.properties]
       fetch_status = true
       source = "cli"
 
@@ -45,16 +76,6 @@ final_space = true
     foreground = 'p:grey'
     template = ' ({{ .Venv }})'
     display_mode = 'always'
-
-  [[blocks.segments]]
-    type = 'text'
-    style = 'plain'
-    background = 'transparent'
-    foreground = 'transparent'
-    foreground_templates = [
-      "{{if gt .Code 0}}p:red{{end}}"
-    ]
-    template = '  Exit {{ .Code }}'
 
 [[blocks]]
   type = 'prompt'
@@ -73,11 +94,11 @@ final_space = true
     style = "plain"
     background = 'transparent'
     foreground = "p:yellow"
-    template = "{{ if .SSHSession }} {{ end }}"
+    template = "{{ if .SSHSession }}󰢹 {{ end }}"
 
   [[blocks.segments]]
     type = 'os'
     style = 'plain'
     background = 'transparent'
     foreground = 'p:magenta'
-    template = ' {{ if .WSL }}WSL at {{ end }}{{.Icon}} ❯'
+    template = '{{ if .WSL }}WSL at {{ end }}{{.Icon}} ❯'
