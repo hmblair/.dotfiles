@@ -63,8 +63,30 @@ final_space = true
     type = 'git'
     style = 'plain'
     background = 'transparent'
+    foreground = 'p:red'
+    template = '{{ if gt .Working.Modified 0 }}  {{ .Working.Modified }}{{ end }}{{ if gt .Working.Added 0 }} 󰜄 {{ .Working.Added }}{{ end }}{{ if gt .Working.Deleted 0 }}  {{ .Working.Deleted }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }}'
+
+    [blocks.segments.properties]
+      fetch_status = true
+      source = "cli"
+
+  [[blocks.segments]]
+    type = 'git'
+    style = 'plain'
+    background = 'transparent'
     foreground = 'p:yellow'
-    template = '{{ if .Working.Changed }}  {{ .Working.Modified }}{{ end }}{{ if .Staging.Changed }}  {{ .Staging.Modified }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }}'
+    template = '{{ if gt .Staging.Modified 0 }}  {{ .Staging.Modified }}{{ end }}{{ if gt .Staging.Added 0 }} 󰜄 {{ .Staging.Added }}{{ end }}{{ if gt .Staging.Deleted 0 }}  {{ .Staging.Deleted }}{{ end }}'
+
+    [blocks.segments.properties]
+      fetch_status = true
+      source = "cli"
+
+  [[blocks.segments]]
+    type = 'git'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'p:grey'
+    template = '{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }}'
 
     [blocks.segments.properties]
       fetch_status = true
