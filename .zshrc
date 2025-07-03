@@ -1,6 +1,7 @@
 #!/bin/zsh
 
 export PATH=$PATH:~/.local/bin
+export PATH=$PATH:~/.config/bin
 source ~/.config/zsh/funcs
 source ~/.config/lsd/setup
 
