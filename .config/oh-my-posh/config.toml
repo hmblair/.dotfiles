@@ -47,6 +47,8 @@ final_space = true
       fetch_status = true
       fetch_upstream_icon = true
       source = "cli"
+      [blocks.segments.properties.ignore_submodules]
+      "*" = "untracked"
 
   [[blocks.segments]]
     type = 'git'
@@ -58,17 +60,21 @@ final_space = true
     [blocks.segments.properties]
       fetch_status = true
       source = "cli"
+      [blocks.segments.properties.ignore_submodules]
+      "*" = "untracked"
 
   [[blocks.segments]]
     type = 'git'
     style = 'plain'
     background = 'transparent'
     foreground = 'p:red'
-    template = '{{ if gt .Working.Modified 0 }}  {{ .Working.Modified }}{{ end }}{{ if gt .Working.Added 0 }} 󰜄 {{ .Working.Added }}{{ end }}{{ if gt .Working.Deleted 0 }}  {{ .Working.Deleted }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }}'
+    template = '{{ if gt .Working.Modified 0 }}  {{ .Working.Modified }}{{ end }}{{ if gt .Working.Added 0 }} 󰜄 {{ .Working.Added }}{{ end }}{{ if gt .Working.Deleted 0 }}  {{ .Working.Deleted }}{{ end }}{{ if gt .Working.Untracked 0 }} 󰛑 {{ .Working.Untracked }}{{ end }}'
 
     [blocks.segments.properties]
       fetch_status = true
       source = "cli"
+      [blocks.segments.properties.ignore_submodules]
+      "*" = "untracked"
 
   [[blocks.segments]]
     type = 'git'
