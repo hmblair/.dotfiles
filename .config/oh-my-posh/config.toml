@@ -67,14 +67,14 @@ final_space = true
     foreground_templates = [
       "{{ if or (gt .Ahead 0) (gt .Behind 0) }}p:red{{ end }}",
     ]
-    template = '{{ .UpstreamIcon }}'
+    template = '{{ if (.UpstreamGone) }}{{ else }}{{ .UpstreamIcon }}{{ end }}'
 
     [blocks.segments.properties]
       fetch_status = true
       fetch_upstream_icon = true
       source = "cli"
       [blocks.segments.properties.ignore_submodules]
-      "*" = "untracked"
+        "*" = "untracked"
 
   [[blocks.segments]]
     type = 'git'
