@@ -20,6 +20,32 @@ final_space = true
   grey = '#6c6c6c'
 
 [[blocks]]
+  type = 'prompt'
+  alignment = 'left'
+  newline = true
+
+  [[blocks.segments]]
+    type = "root"
+    style = "plain"
+    background = 'transparent'
+    foreground = "p:yellow"
+    template = "\uF0E7"
+
+  [[blocks.segments]]
+    type = "session"
+    style = "plain"
+    background = 'transparent'
+    foreground = "p:yellow"
+    template = "{{ if .SSHSession }}󰢹 {{ end }}"
+
+  [[blocks.segments]]
+    type = 'os'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'p:magenta'
+    template = '{{ if .WSL }}WSL at {{ end }}{{.Icon}} ❯'
+
+[[blocks]]
   type = 'rprompt'
   overflow = 'hidden'
 
@@ -105,29 +131,3 @@ final_space = true
     foreground = 'p:grey'
     template = ' ({{ .Venv }})'
     display_mode = 'always'
-
-[[blocks]]
-  type = 'prompt'
-  alignment = 'left'
-  newline = true
-
-  [[blocks.segments]]
-    type = "root"
-    style = "plain"
-    background = 'transparent'
-    foreground = "p:yellow"
-    template = "\uF0E7"
-
-  [[blocks.segments]]
-    type = "session"
-    style = "plain"
-    background = 'transparent'
-    foreground = "p:yellow"
-    template = "{{ if .SSHSession }}󰢹 {{ end }}"
-
-  [[blocks.segments]]
-    type = 'os'
-    style = 'plain'
-    background = 'transparent'
-    foreground = 'p:magenta'
-    template = '{{ if .WSL }}WSL at {{ end }}{{.Icon}} ❯'
