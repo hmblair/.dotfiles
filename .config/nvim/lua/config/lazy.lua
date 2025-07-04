@@ -29,7 +29,7 @@ require("lazy").setup({
 
 if vim.fn.has("nvim-0.10") == 1 then
   require'nvim-treesitter.configs'.setup {
-    ensure_installed = { "c", "cpp", "python", "lua", "vim", "markdown" },
+    ensure_installed = { "c", "cpp", "python", "lua", "vim", "markdown", "javascript" },
     sync_install = false,
     auto_install = true,
     highlight = {
@@ -48,4 +48,11 @@ require('Comment').setup {
   },
 }
 vim.opt.termguicolors = true
--- require("bufferline").setup{}
+
+-- Auto-update
+
+vim.api.nvim_create_autocmd("VimEnter", {
+    callback=function()
+      require("lazy").update({show = false})
+    end
+})
