@@ -1,3 +1,10 @@
+-- Auto-update plugins
+vim.api.nvim_create_autocmd("VimEnter", {
+    callback=function()
+      require("lazy").update({show = false})
+    end
+})
+
 -- Colour scheme
 vim.cmd[[colorscheme tokyonight-night]]
 
@@ -8,8 +15,6 @@ vim.opt.undofile = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
-vim.opt.signcolumn = 'yes'
-
 -- Highlight the current line
 vim.opt.cursorline = true
 
@@ -18,6 +23,9 @@ vim.opt.scrolloff = 10
 
 vim.g.have_nerd_font = true
 vim.opt.mouse = 'a'
+vim.opt.termguicolors = true
+vim.opt.inccommand = "split"
+vim.opt.signcolumn = 'yes'
 
 -- Show (relative) line numbers
 vim.opt.number = true
@@ -26,8 +34,6 @@ vim.opt.relativenumber = true
 -- Show whitespace characters
 vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
-vim.opt.inccommand = "split"
 
 -- Highlight on yank
 vim.api.nvim_exec([[

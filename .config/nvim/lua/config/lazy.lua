@@ -25,34 +25,3 @@ require("lazy").setup({
   },
   checker = { enabled = true },
 })
-
-
-if vim.fn.has("nvim-0.10") == 1 then
-  require'nvim-treesitter.configs'.setup {
-    ensure_installed = { "c", "cpp", "python", "lua", "vim", "markdown", "javascript" },
-    sync_install = false,
-    auto_install = true,
-    highlight = {
-      enable = true,
-      additional_vim_regex_highlighting = false,
-    },
-  }
-else
-end
-
-require('hardline').setup {}
-require('nvim-tree').setup {}
-require('Comment').setup {
-  toggler = {
-    line  = 'com',
-  },
-}
-vim.opt.termguicolors = true
-
--- Auto-update
-
-vim.api.nvim_create_autocmd("VimEnter", {
-    callback=function()
-      require("lazy").update({show = false})
-    end
-})

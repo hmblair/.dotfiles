@@ -45,4 +45,3 @@ lspconfig.pyright.setup({
 })
 
 vim.lsp.log.set_level(vim.log.levels.OFF)
-
