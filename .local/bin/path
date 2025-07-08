@@ -1,0 +1,70 @@
+#!/bin/zsh
+
+FILE=~/.config/shell/paths
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+path-read() {
+  while read -r line; do
+    line="${line/#\~/$HOME}"
+    _PATHS+=($line)
+  done < $FILE
+  export PATH=$PATH:$(IFS=':'; echo "${_PATHS[*]}")
+}
+
+path-append() {
+  for p in "$@"; do
+    if [ -z "$VAR" ]; then
+      echo "Error: Path '$p' does not exist or is invalid"
+      continue
+    fi
+    if ! grep -Fxq "$VAR" "$FILE"; then
+      echo "$VAR" >> "$FILE"
+    fi
+  done
+}
+
+path-remove() {
+  for p in "$@"; do
+    VAR=$(readlink -f "$p")
+    echo $VAR
+    if [ -z "$VAR" ]; then
+      echo "Error: Path '$p' does not exist or is invalid"
+      continue
+    fi
+    sed -i '' "\|^$VAR\$|d" "$FILE"
+  done
+}
+
+path-list() {
+  echo "$PATH" | tr ':' '\n' | while read -r dir; do
+    if [ -d "$dir" ]; then
+      echo -e "$dir"
+    else
+      echo -e "${RED}$dir${NC}"
+    fi
+  done
+}
+
+case "$1" in
+  "read")
+    path-read
+    ;;
+  "append")
+    shift
+    path-append "$@"
+    ;;
+  "remove")
+    shift
+    path-remove "$@"
+    ;;
+  "list")
+    path-list
+    ;;
+  *)
+    echo "Usage: $(basename $0) {read|append|remove|list}"
+    ;;
+esac

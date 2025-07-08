@@ -1,0 +1,62 @@
+#!/bin/zsh
+
+alias mv="mv -i"
+alias py="python3"
+alias vi="nvim"
+alias vim="nvim"
+alias clear="clear; clear"
+alias rsync="rsync -azh --progress"
+
+source() {
+  if [[ $# -eq 0 ]]; then
+    builtin source ~/.zshrc
+  else
+    builtin source "$@"
+  fi
+}
+
+png() {
+  if ! command -v magick &> /dev/null; then
+    echo "Error: imagemagick is not installed." >&2
+    return 1
+  fi
+  local file="$1"
+  magick -quality 100 -density 600 "$file" "${file%.*}.png"
+}
+
+user() {
+  if ! command -v op &> /dev/null; then
+    echo "error: 1password CLI is not installed." >&2
+    return 1
+  fi
+  op item get "$1" --field username
+}
+
+pswd() {
+  if ! command -v op &> /dev/null; then
+    echo "error: 1password CLI is not installed." >&2
+    return 1
+  fi
+  op item get "$1" --field password
+}
+
+sherlock() {
+  username=$(user stanford)
+  password=$(pswd stanford)
+  expect -c "
+  log_user 0
+  spawn ssh $username@login.sherlock.stanford.edu
+  expect \"$username@login.sherlock.stanford.edu's password:\"
+  send \"$password\r\"
+  expect \"Enter a passcode or select one of the following options:\"
+  send \"1\r\"
+  interact
+  "
+}
+
+imp() {
+  username=$(user imp)
+  password=$(pswd imp)
+  sshpass -p "$password" ssh $username@imp
+}
+

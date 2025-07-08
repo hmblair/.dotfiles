@@ -1,0 +1,63 @@
+#!/bin/zsh
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+JSON=$(
+  curl \
+  -H "CF-Access-Client-Id: 85b3e04e33f0516b51179ee1f7d337c2.access" \
+  -H "CF-Access-Client-Secret: c641ce3d891f0360c0884de2050335232e39cf95ea8c4633e20776223220c48b" \
+  -Ls status.hmblair.com
+)
+UP=$(echo $JSON | grep 502)
+if [[ ! -z $UP ]]; then
+  echo "${RED} status.hmblair.com did not respond.${NC}"
+  exit 1
+fi
+ACCESS=$(echo $JSON | grep "Cloudflare Access")
+if [[ ! -z $ACCESS ]]; then
+  echo "${RED} Access denied to status.hmblair.com did not respond.${NC}"
+  exit 1
+fi
+
+# Parse and check statuses
+HMBlair_Status=$(echo $JSON | jq -r '.hmblair')
+Jellyfin_Status=$(echo $JSON | jq -r '.jellyfin')
+Immich_Status=$(echo $JSON | jq -r '.immich')
+LastBackup=$(echo $JSON | jq -r '.lastBackup')
+CPU_Usage=$(echo $JSON | jq -r '.cpuUsage')
+Memory_Usage=$(echo $JSON | jq -r '.memoryUsage')
+Storage_Usage=$(echo $JSON | jq -r '.storageUsage')
+Ext_Storage_Usage=$(echo $JSON | jq -r '.extStorageUsage')
+
+if [[ $HMBlair_Status == "Healthy" ]]; then
+  echo " hmblair.com:         " "${GREEN} Healthy ${NC}"
+else
+  echo " hmblair.com:         " "${RED} Dead ${NC}"
+fi
+
+if [[ $Jellyfin_Status == "Healthy" ]]; then
+  echo " jellyfin.hmblair.com:" "${GREEN} Healthy ${NC}"
+else
+  echo " jellyfin.hmblair.com:" "${RED} Dead ${NC}"
+fi
+
+if [[ $Immich_Status == "Healthy" ]]; then
+  echo " photos.hmblair.com:  " "${GREEN} Healthy ${NC}"
+else
+  echo " photos.hmblair.com:  " "${RED} Dead ${NC}"
+fi
+
+if [[ $LastBackup == $(date +%Y-%m-%d) ]]; then
+  echo " Last backup:         " "${GREEN} ${LastBackup}${NC}"
+else
+  echo " Last backup:         " "${RED} ${LastBackup}${NC}"
+fi
+
+# Print system resource usage
+echo " CPU Usage:           " "${CYAN}${CPU_Usage}${NC}"
+echo " Memory Usage:        " "${CYAN}${Memory_Usage}${NC}"
+echo " Storage Usage:       " "${CYAN}${Storage_Usage}${NC}"
+echo " External Usage:      " "${CYAN}${Ext_Storage_Usage}${NC}"

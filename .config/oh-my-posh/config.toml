@@ -25,13 +25,6 @@ final_space = true
   newline = true
 
   [[blocks.segments]]
-    type = "root"
-    style = "plain"
-    background = 'transparent'
-    foreground = "p:yellow"
-    template = "\uF0E7"
-
-  [[blocks.segments]]
     type = "session"
     style = "plain"
     background = 'transparent'
