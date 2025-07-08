@@ -7,7 +7,9 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # Bootstrap user-defined paths
 
 export PATH=~/.local/bin:$PATH
-source path read
+if [ -f ~/.config/shell/paths ]; then
+  source path read
+fi
 
 # Load user-defined environment variables
 
