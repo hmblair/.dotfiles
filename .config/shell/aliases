@@ -40,6 +40,14 @@ pswd() {
   op item get "$1" --field password
 }
 
+cred() {
+  if ! command -v op &> /dev/null; then
+    echo "error: 1password CLI is not installed." >&2
+    return 1
+  fi
+  op item get "$1" --field credential
+}
+
 sherlock() {
   username=$(user stanford)
   password=$(pswd stanford)
