@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+source ~/.config/shell/aliases
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -7,8 +9,8 @@ NC='\033[0m'
 
 JSON=$(
   curl \
-  -H "CF-Access-Client-Id: 85b3e04e33f0516b51179ee1f7d337c2.access" \
-  -H "CF-Access-Client-Secret: c641ce3d891f0360c0884de2050335232e39cf95ea8c4633e20776223220c48b" \
+  -H "CF-Access-Client-Id: $(user CloudFlare-Access)" \
+  -H "CF-Access-Client-Secret: $(cred CloudFlare-Access)" \
   -Ls status.hmblair.com
 )
 UP=$(echo $JSON | grep 502)
