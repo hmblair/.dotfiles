@@ -11,7 +11,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   export GREP_COLORS='ms=1;33'
 fi
-GREP_VAR="$(basename $(pwd))"
+GREP_VAR="$(basename "$(pwd)")"
 FLAGS=""
 ARGS=""
 for arg in "$@"; do

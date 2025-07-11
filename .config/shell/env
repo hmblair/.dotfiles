@@ -1,6 +1,0 @@
-#!/bin/zsh
-
-if command -v brew &> /dev/null; then
-  export CC="$(brew --prefix)/opt/llvm/bin/clang"
-  export CXX="$(brew --prefix)/opt/llvm/bin/clang++"
-fi
