@@ -15,4 +15,6 @@ fi
 
 # Load user-defined environment variables
 
-source ~/.config/shell/env
+if [ -f ~/.config/shell/env ]; then
+  source ~/.config/shell/env
+fi
