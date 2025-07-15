@@ -18,3 +18,9 @@ fi
 if [ -f ~/.config/shell/env ]; then
   source ~/.config/shell/env
 fi
+
+# Turn the annoying 'quit unexpectedly' messages into notifications
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  defaults write com.apple.CrashReporter UseUNC 1
+fi
