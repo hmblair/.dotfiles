@@ -57,3 +57,5 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     end
   end
 })
+
+vim.opt.shortmess:append("I")
