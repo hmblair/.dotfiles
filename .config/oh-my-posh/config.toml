@@ -21,6 +21,21 @@ final_space = true
 
 [[blocks]]
   type = 'prompt'
+  alignment = 'right'
+  newline = true
+
+  [[blocks.segments]]
+    type = "path"
+    style = "plain"
+    background = 'transparent'
+    foreground = "p:grey"
+    template = "{{ .Path }}"
+
+    [blocks.segments.properties]
+      style = "full"
+
+[[blocks]]
+  type = 'prompt'
   alignment = 'left'
   newline = true
 
@@ -46,11 +61,8 @@ final_space = true
     type = 'text'
     style = 'plain'
     background = 'transparent'
-    foreground = 'transparent'
-    foreground_templates = [
-      "{{if gt .Code 0}}p:red{{end}}"
-    ]
-    template = ' Exit {{ .Code }} '
+    foreground = 'p:red'
+    template = '{{if gt .Code 0}} Exit {{ .Code }} {{ end }}'
 
   [[blocks.segments]]
     type = 'git'
