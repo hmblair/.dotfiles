@@ -1,14 +1,15 @@
 #!/bin/zsh
 
-# Import aliases
-
-source ~/.config/shell/aliases
-
 # Init oh-my-posh
 
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
     eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/config.toml)"
 fi
+
+# Init fzf
+
+source <(fzf --zsh)
+export FZF_DEFAULT_OPTS_FILE="$HOME/.config/fzf/config"
 
 # Init miniconda
 
@@ -16,7 +17,11 @@ if command -v conda &> /dev/null; then
     eval "$(conda "shell.$(basename "${SHELL}")" hook)"
 fi
 
-# Syntax highlighting
+# Import aliases
+
+source ~/.config/shell/aliases
+
+# Init syntax highlighting
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -24,7 +29,13 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
   source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
-# Advanced autocomplete settings
+# Init autosuggestions
+
+source ~/.config/zsh/autosuggestions/zsh-autosuggestions.zsh
+export ZSH_AUTOSUGGEST_STRATEGY=(completion)
+setopt menu_complete
+
+# Advanced history settings
 
 HISTFILE=~/.zhistory
 SAVEHIST=1000
@@ -40,3 +51,7 @@ bindkey "^[[B" history-search-forward
 autoload -Uz compinit
 compinit
 zstyle ':completion:*:*:argument*' tag-order - '! urls'
+
+# Misc options
+
+setopt cd_silent
