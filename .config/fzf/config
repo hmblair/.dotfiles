@@ -1,0 +1,11 @@
+--style default
+--exact
+--height 60%
+--layout reverse
+--border rounded
+--color info:10,prompt:15,spinner:10,pointer:13,marker:13,hl:10,hl+:10,fg+:15,bg+:0
+--info inline-right
+--preview 'fzf-preview.sh {}'
+--no-scrollbar
+--prompt ./
+--pointer ❯
