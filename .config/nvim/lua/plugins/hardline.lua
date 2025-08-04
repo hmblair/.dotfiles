@@ -1,4 +1,6 @@
 return {
   'ojroques/nvim-hardline',
-  opts = {},
+  opts = {
+    bufferline = true,
+  },
 }
