@@ -2,10 +2,29 @@
 
 alias mv="mv -i"
 alias py="python3"
+alias v="nvim"
 alias vi="nvim"
 alias vim="nvim"
 alias clear="clear; clear"
 alias rsync="rsync -azh --progress"
+alias fox="open -na Firefox"
+alias gperf="/opt/homebrew/bin/gperf"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  alias finder="open -R ."
+fi
+alias chatgpt="OPENAI_API_KEY=\$(cred chatgpt-cli) chatgpt"
+
+whereami() {
+  echo $(whoami)@$(hostname):$(pwd)
+}
+
+# fzf() {
+#   local dir
+#   dir="$(/opt/homebrew/bin/fzf)"
+#   if [[ -n "$dir" ]]; then
+#     cd "$(dirname "$dir")" || return 1
+#   fi
+# }
 
 source() {
   if [[ $# -eq 0 ]]; then
