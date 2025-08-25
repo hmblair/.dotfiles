@@ -47,6 +47,13 @@ final_space = true
     template = "{{ if .SSHSession }}󰢹 {{ end }}"
 
   [[blocks.segments]]
+    type = "root"
+    style = "plain"
+    background = "transparent"
+    foreground = "p:yellow"
+    template = " "
+
+  [[blocks.segments]]
     type = 'os'
     style = 'plain'
     background = 'transparent'
