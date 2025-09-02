@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
 # Init oh-my-posh
 
@@ -52,6 +52,8 @@ autoload -Uz compinit
 compinit
 zstyle ':completion:*:*:argument*' tag-order - '! urls'
 
-# Misc options
+# zsh options
 
+setopt nullglob
 setopt cd_silent
+setopt RM_STAR_SILENT

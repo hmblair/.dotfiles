@@ -1,17 +1,37 @@
 #!/bin/zsh
 
-# Add homebrew paths
+# Scratch directory
 
-if command -v /opt/homebrew/bin/brew &> /dev/null; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+export SCDIR="$HOME/scratch"
+mkdir -p "/tmp/scratch"
+ln -sfn "/tmp/scratch" $SCDIR
+
+# Download directory
+
+export DLDIR="$HOME/downloads"
+mkdir -p "/tmp/downloads"
+ln -sfn "/tmp/downloads" $DLDIR
+
+# Install homebrew and add paths
+
+if ! command -v /opt/homebrew/bin/brew &> /dev/null; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+if [ ! -f $HOME/.paths/brew ]; then
+  touch ~/.paths/brew
+  echo $(/opt/homebrew/bin/brew --prefix)/bin >> ~/.paths/brew
+  echo $(/opt/homebrew/bin/brew --prefix)/sbin >> ~/.paths/brew
 fi
 
 # Bootstrap user-defined paths
 
-export PATH=~/.local/bin:$PATH
-if [ -f ~/.config/shell/paths ]; then
-  source path read
+if [ ! -f $HOME/.paths/boot ]; then
+  touch $HOME/.paths/boot
+  echo "$HOME/.local/bin" >> $HOME/.paths/boot
 fi
+
+source ~/dev/zu/path read
 
 # Load user-defined environment variables
 
@@ -23,4 +43,12 @@ fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   defaults write com.apple.CrashReporter UseUNC 1
+fi
+
+# Custom screenshot location
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export SSDIR="$HOME/screenshots"
+  mkdir -p "$SSDIR"
+  defaults write com.apple.screencapture location -string "$SSDIR"
 fi
