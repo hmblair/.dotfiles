@@ -1,0 +1,218 @@
+#!/bin/zsh
+
+PATHDIR=~/.paths
+mkdir -p "$PATHDIR"
+
+# ANSI colour tokens
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# Strikethrough tokens
+
+ST='\e[9m'
+NST='\e[0m'
+
+# Managed paths
+
+paths() {
+  setopt nullglob
+  cat $PATHDIR/*
+  unsetopt nullglob
+}
+
+# System paths
+
+sys-path() {
+  setopt nullglob
+  cat /etc/paths /etc/paths.d/*
+  unsetopt nullglob
+}
+
+contains() {
+  TXT="$1"
+  VAR="$2"
+  echo $TXT | grep -Fxq "$VAR"
+  return $?
+}
+
+path-to-file() {
+  echo $PATH | tr ':' '\n' | grep -v '^$'
+}
+
+file-to-path() {
+  _PATHS=()
+  while read -r line; do
+    _PATHS+=("${line/#\~/$HOME}")
+  done < <(cat $@)
+  echo $(IFS=':'; echo "${_PATHS[*]}")
+}
+
+remove-dups() {
+  STR=$(path-to-file $1)
+  STR=$(echo "$STR" | awk '!seen[$0]++')
+  echo $(echo $STR | file-to-path)
+}
+
+no-relative() {
+  echo $(cd $1 > /dev/null 2>&1 && pwd)
+}
+
+path-read() {
+  export PATH=$PATH:$(file-to-path $@)
+}
+
+path-managed() {
+    VAR=$(no-relative "$1")
+    paths | grep -Fxq "$VAR"
+    return $?
+}
+
+path-sys() {
+  VAR=$(no-relative "$1")
+  [ -z "$VAR" ] && VAR="$1"
+  TXT=$(sys-path)
+  contains "$TXT" "$VAR"
+  return $?
+}
+
+path-add() {
+  for p in "$@"; do
+    VAR=$(no-relative "$p")
+    if [ -z "$VAR" ]; then
+      echo "Error: '$p' does not exist or is invalid"
+      continue
+    fi
+    
+    # Get available groups
+    groups=(~/.paths/*)
+    if [[ ! -d ~/.paths ]] || [[ ${#groups} -eq 0 ]] || [[ ! -e "${groups[1]}" ]]; then
+      echo "No groups found in ~/.paths"
+      continue
+    fi
+    
+    # Arrow-based menu
+    selected=1
+    menu_lines=$((${#groups} + 3))
+    
+    # Initial draw
+    echo "Select group for '$p':"
+    echo
+    for i in {1..${#groups}}; do
+      group_name=$(basename "${groups[$i]}")
+      if [[ $i -eq $selected ]]; then
+        echo "→ $group_name"
+      else
+        echo "  $group_name"
+      fi
+    done
+    echo
+    echo "Use ↑/↓ arrows to navigate, Enter to select, q to skip"
+    
+    while true; do
+      read -rsn key
+      case "$key" in
+        $'\x1b')
+          read -rsn2 key
+          case "$key" in
+            '[A') # Up arrow
+              if (( selected > 1 )); then
+                (( selected-- ))
+                # Move cursor up and redraw menu
+                printf "\033[${menu_lines}A"
+                echo "Select group for '$p':"
+                echo
+                for i in {1..${#groups}}; do
+                  group_name=$(basename "${groups[$i]}")
+                  if [[ $i -eq $selected ]]; then
+                    echo "→ $group_name"
+                  else
+                    echo "  $group_name"
+                  fi
+                done
+                echo
+                echo "Use ↑/↓ arrows to navigate, Enter to select, q to skip"
+              fi
+              ;;
+            '[B') # Down arrow
+              if (( selected < ${#groups} )); then
+                (( selected++ ))
+                # Move cursor up and redraw menu
+                printf "\033[${menu_lines}A"
+                echo "Select group for '$p':"
+                echo
+                for i in {1..${#groups}}; do
+                  group_name=$(basename "${groups[$i]}")
+                  if [[ $i -eq $selected ]]; then
+                    echo "→ $group_name"
+                  else
+                    echo "  $group_name"
+                  fi
+                done
+                echo
+                echo "Use ↑/↓ arrows to navigate, Enter to select, q to skip"
+              fi
+              ;;
+          esac
+          ;;
+        '') # Enter
+          selected_group="${groups[$selected]}"
+          echo "$VAR" >> "$selected_group"
+          echo "Added '$VAR' to $(basename "$selected_group")"
+          break
+          ;;
+        'q'|'Q')
+          echo "Skipped '$p'"
+          break
+          ;;
+      esac
+    done
+  done
+}
+
+path-list() {
+  path-to-file | while read -r VAR; do
+    FULL=$(no-relative $VAR)
+    if [ -z "$FULL" ]; then
+      PR="${ST}$VAR${NST}"
+    else
+      PR="$FULL"
+    fi
+
+    if contains "$(paths)" "$VAR"; then
+      ICON="${GREEN}󱋻${NC}"
+    elif contains "$(sys-path)" "$VAR"; then
+      ICON="${YELLOW}󰼆${NC}"
+    else
+      ICON="${RED}󰼈${NC}"
+    fi
+
+    echo -e "${ICON} ${PR}"
+  done
+}
+
+path-dir() {
+  echo $PATHDIR
+}
+
+case "$1" in
+  "read")
+    path-read "$PATHDIR"/*
+    ;;
+  "add")
+    shift
+    path-add "$@"
+    ;;
+  "list")
+    path-list
+    ;;
+  "dir")
+    path-dir
+    ;;
+  *)
+    echo "Usage: $(basename $0) {read|add|list|dir}"
+    ;;
+esac

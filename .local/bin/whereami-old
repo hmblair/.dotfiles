@@ -1,0 +1,17 @@
+#!/bin/zsh
+
+DIR=$(pwd)
+
+while [[ $(pwd) != '/' ]]; do
+  pushd .. > /dev/null
+done
+
+BAR="├"
+while [[ $(pwd) != $DIR ]]; do
+
+  echo $BAR $(basename $(pwd))
+  BAR=$BAR"─"
+
+  popd > /dev/null
+
+done

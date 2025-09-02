@@ -1,0 +1,17 @@
+#!/bin/zsh
+
+FILES=("$@")
+NUM_FILES=${#FILES[@]}
+NUM_DIGITS=${#NUM_FILES}
+
+for ((i = 0; i < NUM_FILES; i++)); do
+  BASENAME=$(basename "${FILES[$i]}")
+  EXTENSION=""
+
+  if [[ "$BASENAME" == *.* && "$BASENAME" != .* ]]; then
+    EXTENSION=".${BASENAME##*.}"
+  fi
+
+  FILENAME=$(printf "%0${NUM_DIGITS}d" "$i")
+  mv "${FILES[$i]}" "${FILENAME}${EXTENSION}"
+done
