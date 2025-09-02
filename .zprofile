@@ -20,8 +20,14 @@ fi
 
 if [ ! -f $HOME/.paths/brew ]; then
   touch ~/.paths/brew
-  echo $(/opt/homebrew/bin/brew --prefix)/bin >> ~/.paths/brew
-  echo $(/opt/homebrew/bin/brew --prefix)/sbin >> ~/.paths/brew
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo $(/opt/homebrew/bin/brew --prefix)/bin >> ~/.paths/brew
+    echo $(/opt/homebrew/bin/brew --prefix)/sbin >> ~/.paths/brew
+  else
+    echo $(/home/linuxbrew/.linuxbrew/bin/brew --prefix)/bin >> ~/.paths/brew
+    echo $(/home/linuxbrew/.linuxbrew/bin/brew --prefix)/sbin >> ~/.paths/brew
+  fi
+
 fi
 
 # Bootstrap user-defined paths
