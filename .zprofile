@@ -12,6 +12,15 @@ export DLDIR="$HOME/downloads"
 mkdir -p "/tmp/downloads"
 ln -sfn "/tmp/downloads" $DLDIR
 
+# Bootstrap user-defined paths
+
+if [ ! -f $HOME/.paths/boot ]; then
+  touch $HOME/.paths/boot
+  echo "$HOME/.local/bin" >> $HOME/.paths/boot
+fi
+
+source ~/dev/zu/path read
+
 # Install homebrew and add paths
 
 if ! command -v brew &> /dev/null; then
@@ -23,15 +32,6 @@ if [ ! -f $HOME/.paths/brew ]; then
   echo $(brew --prefix)/bin >> ~/.paths/brew
   echo $(brew --prefix)/sbin >> ~/.paths/brew
 fi
-
-# Bootstrap user-defined paths
-
-if [ ! -f $HOME/.paths/boot ]; then
-  touch $HOME/.paths/boot
-  echo "$HOME/.local/bin" >> $HOME/.paths/boot
-fi
-
-source ~/dev/zu/path read
 
 # Load user-defined environment variables
 
