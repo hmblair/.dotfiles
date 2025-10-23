@@ -17,10 +17,6 @@ if command -v conda &> /dev/null; then
     eval "$(conda "shell.$(basename "${SHELL}")" hook)"
 fi
 
-# Import aliases
-
-source ~/.config/shell/aliases
-
 # Init syntax highlighting
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -57,3 +53,8 @@ zstyle ':completion:*:*:argument*' tag-order - '! urls'
 setopt nullglob
 setopt cd_silent
 setopt RM_STAR_SILENT
+
+# Import aliases
+
+source ~/.config/shell/aliases
+
