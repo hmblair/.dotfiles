@@ -4,7 +4,7 @@ if vim.fn.has("nvim-0.11") == 1 then
     opts = {
       ensure_installed = {
         "clangd",
-        "pylsp",
+        "pyright",
         "bash-language-server",
         "lua_ls",
       },
