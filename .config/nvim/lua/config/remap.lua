@@ -1,13 +1,18 @@
-vim.g.mapleader = " "
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
-vim.keymap.set('n', '<leader>pv', '<cmd>NvimTreeToggle<CR>')
+-- Clear search highlight
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { desc = 'Clear search highlight' })
 
-vim.keymap.set('n', '<leader>nb', ':bnext<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<leader>pb', ':bprevious<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<leader>db', ':bdelete<CR>', { noremap = true, silent = true })
+-- Buffer navigation
+vim.keymap.set('n', '<leader>nb', '<cmd>bnext<CR>', { desc = '[N]ext [B]uffer' })
+vim.keymap.set('n', '<leader>pb', '<cmd>bprevious<CR>', { desc = '[P]revious [B]uffer' })
+vim.keymap.set('n', '<leader>db', '<cmd>bdelete<CR>', { desc = '[D]elete [B]uffer' })
 
-local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>fzf', builtin.find_files, { desc = 'Telescope find files' })
-vim.keymap.set('n', '<leader>fzg', builtin.live_grep, { desc = 'Telescope live grep' })
+-- Disable F1 help
+vim.keymap.set('n', '<F1>', '<Nop>', { desc = 'Disable F1 help' })
 
-vim.api.nvim_set_keymap('n', '<F1>', '<NOP>', { noremap = true, silent = true })
+-- Delete without yanking (d), cut with yanking (x)
+vim.keymap.set({ 'n', 'v' }, 'd', '"_d', { desc = 'Delete (no yank)' })
+vim.keymap.set('n', 'dd', '"_dd', { desc = 'Delete line (no yank)' })
+vim.keymap.set({ 'n', 'v' }, 'D', '"_D', { desc = 'Delete to end (no yank)' })
+vim.keymap.set({ 'n', 'v' }, 'x', 'd', { desc = 'Cut (yank)' })
+vim.keymap.set('n', 'xx', 'dd', { desc = 'Cut line (yank)' })
+vim.keymap.set({ 'n', 'v' }, 'X', 'D', { desc = 'Cut to end (yank)' })

@@ -1,13 +1,3 @@
--- Auto-update plugins
-vim.api.nvim_create_autocmd("VimEnter", {
-    callback=function()
-      require("lazy").update({show = false})
-    end
-})
-
--- Colour scheme
-vim.cmd[[colorscheme tokyonight-night]]
-
 -- Preserve undos between sessions
 vim.opt.undofile = true
 

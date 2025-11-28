@@ -1,15 +1,12 @@
-if vim.fn.has("nvim-0.11") == 1 then
-  return {
-    "mason-org/mason.nvim",
-    opts = {
-      ensure_installed = {
-        "clangd",
-        "pyright",
-        "bash-language-server",
-        "lua_ls",
-      },
+return {
+  'mason-org/mason.nvim',
+  cond = vim.fn.has('nvim-0.11') == 1,
+  opts = {
+    ensure_installed = {
+      'bash-language-server',
+      'clangd',
+      'lua_ls',
+      'pyright',
     },
-  }
-else
-  return {}
-end
+  },
+}
