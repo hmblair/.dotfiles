@@ -1,5 +1,9 @@
 #!/usr/bin/env zsh
 
+# Add zu bin to path
+
+export PATH="$HOME/.local/share/zu/bin:$PATH"
+
 # Ensure we stay in emacs mode
 
 bindkey -e
