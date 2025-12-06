@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Skip if stow already installed
-if command -v stow >/dev/null 2>&1; then
-    exit 0
+if [ -x "$HOME/.local/bin/stow" ] || command -v stow >/dev/null 2>&1; then
+    return 0 2>/dev/null || exit 0
 fi
 
 # Stow requires Perl
@@ -18,20 +18,22 @@ BUILD_DIR="/tmp/stow-build-$$"
 PREFIX="$HOME/.local"
 
 mkdir -p "$BUILD_DIR" "$PREFIX"
-cd "$BUILD_DIR"
 
-echo "Downloading stow ${STOW_VERSION}..."
-curl -L "$STOW_URL" -o stow.tar.gz || exit 1
-tar xf stow.tar.gz
-cd "stow-${STOW_VERSION}"
+(
+    cd "$BUILD_DIR"
 
-echo "Configuring..."
-./configure --prefix="$PREFIX" || exit 1
+    echo "Downloading stow ${STOW_VERSION}..."
+    curl -L "$STOW_URL" -o stow.tar.gz || exit 1
+    tar xf stow.tar.gz
+    cd "stow-${STOW_VERSION}"
 
-echo "Installing to $PREFIX..."
-make install || exit 1
+    echo "Configuring..."
+    ./configure --prefix="$PREFIX" || exit 1
 
-cd /
+    echo "Installing to $PREFIX..."
+    make install || exit 1
+)
+
 rm -rf "$BUILD_DIR"
 
 echo "stow installed to $PREFIX/bin/stow"
