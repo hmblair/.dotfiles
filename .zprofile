@@ -22,6 +22,12 @@ if [[ ! -f "$HOME/.paths/boot" ]]; then
     echo "$HOME/.local/bin" >> "$HOME/.paths/boot"
 fi
 
+# Init lmod if available (before installs so we can use modules)
+
+if [[ -n "$MODULESHOME" && -f "$MODULESHOME/init/zsh" ]]; then
+    source "$MODULESHOME/init/zsh"
+fi
+
 # Install and update core programs
 
 source "$HOME/.config/install/install"
@@ -36,12 +42,6 @@ if command -v brew &> /dev/null && [ ! -f "$HOME/.paths/brew" ]; then
     touch "$HOME/.paths/brew"
     echo "$(brew --prefix)/bin" >> "$HOME/.paths/brew"
     echo "$(brew --prefix)/sbin" >> "$HOME/.paths/brew"
-fi
-
-# Init lmod if available
-
-if [[ -n "$MODULESHOME" && -f "$MODULESHOME/init/zsh" ]]; then
-    source "$MODULESHOME/init/zsh"
 fi
 
 # Load user-defined environment variables
