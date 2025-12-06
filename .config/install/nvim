@@ -15,8 +15,8 @@ if ! command -v nvim &> /dev/null; then
     cd neovim
 
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        export CFLAGS="-gdwarf-4"
-        export CXXFLAGS="-gdwarf-4"
+        export CFLAGS="-gdwarf-4 -D_DEFAULT_SOURCE"
+        export CXXFLAGS="-gdwarf-4 -D_DEFAULT_SOURCE"
     fi
 
     JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
