@@ -15,18 +15,25 @@ if ! command -v nvim &> /dev/null; then
 
     JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
+    if has_sudo; then
+        PREFIX="/usr/local"
+    else
+        PREFIX="$HOME/.local"
+    fi
+
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo \
+            CMAKE_INSTALL_PREFIX="$PREFIX" \
             CMAKE_EXTRA_FLAGS="-DCMAKE_C_FLAGS='-gdwarf-4'" \
             DEPS_CMAKE_FLAGS="-DTREESITTER_ARGS=-DCMAKE_C_FLAGS='-D_BSD_SOURCE -gdwarf-4'"
     else
-        make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo
+        make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX"
     fi
 
     if has_sudo; then
-        sudo make install CMAKE_INSTALL_PREFIX="/usr/local"
+        sudo make install
     else
-        make install CMAKE_INSTALL_PREFIX="$HOME/.local"
+        make install
     fi
 
     popd > /dev/null
