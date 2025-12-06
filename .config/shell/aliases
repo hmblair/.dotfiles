@@ -67,20 +67,6 @@ cred() {
   op item get "$1" --field credential
 }
 
-sherlock() {
-  username=$(user stanford)
-  password=$(pswd stanford)
-  expect -c "
-  log_user 0
-  spawn ssh $username@login.sherlock.stanford.edu
-  expect \"$username@login.sherlock.stanford.edu's password:\"
-  send \"$password\r\"
-  expect \"Enter a passcode or select one of the following options:\"
-  send \"1\r\"
-  interact
-  "
-}
-
 imp() {
   username=$(user imp)
   password=$(pswd imp)
