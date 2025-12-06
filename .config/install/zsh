@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Skip if zsh already installed
+if command -v zsh >/dev/null 2>&1; then
+    exit 0
+fi
+
+# Build from source
+ZSH_VERSION="5.9"
+ZSH_URL="https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.xz/download"
+BUILD_DIR="/tmp/zsh-build-$$"
+PREFIX="$HOME/.local"
+
+mkdir -p "$BUILD_DIR" "$PREFIX"
+cd "$BUILD_DIR"
+
+echo "Downloading zsh ${ZSH_VERSION}..."
+curl -L "$ZSH_URL" -o zsh.tar.xz || exit 1
+tar xf zsh.tar.xz
+cd "zsh-${ZSH_VERSION}"
+
+echo "Configuring..."
+./configure --prefix="$PREFIX" || exit 1
+
+echo "Building..."
+make || exit 1
+
+echo "Installing to $PREFIX..."
+make install || exit 1
+
+cd /
+rm -rf "$BUILD_DIR"
+
+# Add zsh exec to .bashrc if not already present
+BASHRC="$HOME/.bashrc"
+EXEC_LINE='[ -x "$HOME/.local/bin/zsh" ] && exec "$HOME/.local/bin/zsh" -l'
+
+if [ -f "$BASHRC" ]; then
+    if ! grep -qF '.local/bin/zsh' "$BASHRC"; then
+        echo "$EXEC_LINE" >> "$BASHRC"
+    fi
+else
+    echo "$EXEC_LINE" > "$BASHRC"
+fi
+
+echo "zsh installed to $PREFIX/bin/zsh"
