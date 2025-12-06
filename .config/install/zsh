@@ -36,7 +36,7 @@ rm -rf "$BUILD_DIR"
 
 # Add zsh exec to .bashrc if not already present
 BASHRC="$HOME/.bashrc"
-EXEC_LINE='[ -x "$HOME/.local/bin/zsh" ] && unset PS1 && exec "$HOME/.local/bin/zsh" -l'
+EXEC_LINE='[ -x "$HOME/.local/bin/zsh" ] && unset PS1 && export MODULESHOME && exec "$HOME/.local/bin/zsh" -l'
 
 if [ -f "$BASHRC" ]; then
     if ! grep -qF '.local/bin/zsh' "$BASHRC"; then
