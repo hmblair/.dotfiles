@@ -38,6 +38,12 @@ if command -v brew &> /dev/null && [ ! -f "$HOME/.paths/brew" ]; then
     echo "$(brew --prefix)/sbin" >> "$HOME/.paths/brew"
 fi
 
+# Init lmod if available
+
+if [[ -n "$MODULESHOME" && -f "$MODULESHOME/init/zsh" ]]; then
+    source "$MODULESHOME/init/zsh"
+fi
+
 # Load user-defined environment variables
 
 if [[ -f "$HOME/.config/shell/env" ]]; then

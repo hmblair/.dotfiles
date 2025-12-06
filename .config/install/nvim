@@ -8,33 +8,27 @@ has_sudo() {
 }
 
 if ! command -v nvim &> /dev/null; then
+    pushd /tmp > /dev/null
+    rm -rf neovim
+    git clone --depth 1 https://github.com/neovim/neovim
+    cd neovim
+
+    JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
+
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Use pre-built AppImage on Linux (extracted, no FUSE needed)
-        mkdir -p "$HOME/.local/bin"
-        curl -Lo /tmp/nvim.appimage \
-            https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.appimage
-        chmod +x /tmp/nvim.appimage
-        (cd "$HOME/.local" && /tmp/nvim.appimage --appimage-extract >/dev/null)
-        mv "$HOME/.local/squashfs-root" "$HOME/.local/nvim"
-        ln -sf "$HOME/.local/nvim/usr/bin/nvim" "$HOME/.local/bin/nvim"
-        rm /tmp/nvim.appimage
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Build from source on macOS
-        pushd /tmp > /dev/null
-        rm -rf neovim
-        git clone --depth 1 https://github.com/neovim/neovim
-        cd neovim
-
-        JOBS=$(sysctl -n hw.ncpu 2>/dev/null || echo 1)
+        make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo \
+            CMAKE_C_FLAGS="-gdwarf-4 -D_DEFAULT_SOURCE" \
+            CMAKE_CXX_FLAGS="-gdwarf-4 -D_DEFAULT_SOURCE"
+    else
         make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo
-
-        if has_sudo; then
-            sudo make install CMAKE_INSTALL_PREFIX="/usr/local"
-        else
-            make install CMAKE_INSTALL_PREFIX="$HOME/.local"
-        fi
-
-        popd > /dev/null
-        rm -rf /tmp/neovim
     fi
+
+    if has_sudo; then
+        sudo make install CMAKE_INSTALL_PREFIX="/usr/local"
+    else
+        make install CMAKE_INSTALL_PREFIX="$HOME/.local"
+    fi
+
+    popd > /dev/null
+    rm -rf /tmp/neovim
 fi
