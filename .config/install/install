@@ -4,4 +4,5 @@ INSTALL_DIR="$HOME/.config/install"
 
 source "$INSTALL_DIR/zu"
 source "$INSTALL_DIR/zsh-plugins"
+source "$INSTALL_DIR/stow"
 source "$INSTALL_DIR/nvim"

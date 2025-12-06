@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# Skip if stow already installed
+if command -v stow >/dev/null 2>&1; then
+    exit 0
+fi
+
+# Stow requires Perl
+if ! command -v perl >/dev/null 2>&1; then
+    echo "Error: Perl is required but not installed"
+    exit 1
+fi
+
+# Build from source
+STOW_VERSION="2.4.0"
+STOW_URL="https://ftp.gnu.org/gnu/stow/stow-${STOW_VERSION}.tar.gz"
+BUILD_DIR="/tmp/stow-build-$$"
+PREFIX="$HOME/.local"
+
+mkdir -p "$BUILD_DIR" "$PREFIX"
+cd "$BUILD_DIR"
+
+echo "Downloading stow ${STOW_VERSION}..."
+curl -L "$STOW_URL" -o stow.tar.gz || exit 1
+tar xf stow.tar.gz
+cd "stow-${STOW_VERSION}"
+
+echo "Configuring..."
+./configure --prefix="$PREFIX" || exit 1
+
+echo "Installing to $PREFIX..."
+make install || exit 1
+
+cd /
+rm -rf "$BUILD_DIR"
+
+echo "stow installed to $PREFIX/bin/stow"

@@ -87,3 +87,26 @@ imp() {
   sshpass -p "$password" ssh $username@imp
 }
 
+ssh-terminfo() {
+  infocmp -x | ssh "$1" 'mkdir -p ~/.terminfo && tic -x -'
+  ssh "$1" 'grep -qF "resize()" ~/.bashrc 2>/dev/null || cat >> ~/.bashrc << '\''EOF'\''
+resize() {
+  old=$(stty -g)
+  stty raw -echo min 0 time 5
+  printf '\''\033[18t'\'' > /dev/tty
+  IFS='\'';t'\'' read -r _ rows cols _ < /dev/tty
+  stty "$old"
+  stty cols "$cols" rows "$rows"
+}
+EOF'
+}
+
+resize() {
+  old=$(stty -g)
+  stty raw -echo min 0 time 5
+  printf '\033[18t' > /dev/tty
+  IFS=';t' read -r _ rows cols _ < /dev/tty
+  stty "$old"
+  stty cols "$cols" rows "$rows"
+}
+
