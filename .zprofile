@@ -32,6 +32,10 @@ if [[ -n "$MODULESHOME" && -f "$MODULESHOME/init/zsh" ]]; then
     source "$MODULESHOME/init/zsh"
 fi
 
+# Ensure .local/bin is in PATH before install checks
+
+export PATH="$HOME/.local/bin:$PATH"
+
 # Install and update core programs
 
 source "$HOME/.config/install/install"
