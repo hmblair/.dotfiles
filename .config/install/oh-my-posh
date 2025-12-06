@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+
+if command -v oh-my-posh &> /dev/null; then
+    return 0 2>/dev/null || exit 0
+fi
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    mkdir -p "$HOME/.local/bin"
+    curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    if command -v brew &> /dev/null; then
+        brew install jandedobbeleer/oh-my-posh/oh-my-posh
+    else
+        mkdir -p "$HOME/.local/bin"
+        curl -s https://ohmyposh.dev/install.sh | bash -s -- -d "$HOME/.local/bin"
+    fi
+fi
