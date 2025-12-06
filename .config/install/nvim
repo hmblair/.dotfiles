@@ -5,12 +5,13 @@ if ! command -v nvim &> /dev/null; then
     git clone https://github.com/neovim/neovim
     cd neovim
 
-    export CFLAGS="-march=native"
-    export CXXFLAGS="-march=native"
+    export CFLAGS="-march=native -gdwarf-4"
+    export CXXFLAGS="-march=native -gdwarf-4"
 
-    make CMAKE_BUILD_TYPE=RelWithDebInfo
+    JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
+    make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo
 
-    if sudo -l &>/dev/null; then
+    if sudo -n true 2>/dev/null; then
         sudo make install CMAKE_INSTALL_PREFIX="/usr/local"
     else
         make install CMAKE_INSTALL_PREFIX="$HOME/.local"

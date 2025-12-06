@@ -4,7 +4,7 @@ ZU_DIR="$HOME/.local/share/zu"
 
 if [[ ! -d "$ZU_DIR" ]]; then
     git clone https://github.com/hmblair/zu.git "$ZU_DIR"
-    "$ZU_DIR/configure" >/dev/null
+    zsh "$ZU_DIR/configure" >/dev/null
 else
-    (cd "$ZU_DIR" && git pull --quiet && ./configure >/dev/null 2>&1 &)
+    (cd "$ZU_DIR" && git pull --quiet && zsh ./configure >/dev/null 2>&1 &)
 fi

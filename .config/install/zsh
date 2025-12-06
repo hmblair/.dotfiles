@@ -12,23 +12,26 @@ BUILD_DIR="/tmp/zsh-build-$$"
 PREFIX="$HOME/.local"
 
 mkdir -p "$BUILD_DIR" "$PREFIX"
-cd "$BUILD_DIR"
 
-echo "Downloading zsh ${ZSH_VERSION}..."
-curl -L "$ZSH_URL" -o zsh.tar.xz || exit 1
-tar xf zsh.tar.xz
-cd "zsh-${ZSH_VERSION}"
+(
+    cd "$BUILD_DIR"
 
-echo "Configuring..."
-./configure --prefix="$PREFIX" || exit 1
+    echo "Downloading zsh ${ZSH_VERSION}..."
+    curl -L "$ZSH_URL" -o zsh.tar.xz || exit 1
+    tar xf zsh.tar.xz
+    cd "zsh-${ZSH_VERSION}"
 
-echo "Building..."
-make || exit 1
+    echo "Configuring..."
+    ./configure --prefix="$PREFIX" || exit 1
 
-echo "Installing to $PREFIX..."
-make install || exit 1
+    echo "Building..."
+    JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
+    make -j"$JOBS" || exit 1
 
-cd /
+    echo "Installing to $PREFIX..."
+    make install || exit 1
+)
+
 rm -rf "$BUILD_DIR"
 
 # Add zsh exec to .bashrc if not already present
