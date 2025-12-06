@@ -68,6 +68,9 @@ automatically-unhide-macos-hidden-apps = true
     cmd-tab = 'workspace-back-and-forth'
     cmd-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
+    cmd-enter = 'exec-and-forget open -na Alacritty'
+    cmd-shift-f = 'layout floating tiling'
+
 [workspace-to-monitor-force-assignment]
     1 = 'main'
     2 = 'main'
