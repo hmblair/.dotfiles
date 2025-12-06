@@ -16,10 +16,9 @@ if ! command -v nvim &> /dev/null; then
     JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        COMPAT_FLAGS="-gdwarf-4 -D_DEFAULT_SOURCE -D_BSD_SOURCE"
         make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo \
-            CMAKE_EXTRA_FLAGS="-DCMAKE_C_FLAGS='$COMPAT_FLAGS' -DCMAKE_CXX_FLAGS='$COMPAT_FLAGS'" \
-            DEPS_CMAKE_FLAGS="-DCMAKE_C_FLAGS='$COMPAT_FLAGS' -DCMAKE_CXX_FLAGS='$COMPAT_FLAGS'"
+            CMAKE_EXTRA_FLAGS="-DCMAKE_C_FLAGS='-gdwarf-4'" \
+            DEPS_CMAKE_FLAGS="-DTREESITTER_ARGS=-DCMAKE_C_FLAGS='-D_BSD_SOURCE -gdwarf-4'"
     else
         make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo
     fi
