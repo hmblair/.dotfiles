@@ -3,31 +3,34 @@
 # Check if sudo is available (not blocked/fake)
 has_sudo() {
     command -v sudo >/dev/null 2>&1 || return 1
-    # Check for messages indicating sudo is blocked (not just password-protected)
     sudo -n true 2>&1 | grep -qiE "(no sudo|not allowed|sorry)" && return 1
     return 0
 }
 
 if ! command -v nvim &> /dev/null; then
-    pushd /tmp > /dev/null
-    rm -rf neovim
-    git clone --depth 1 https://github.com/neovim/neovim
-    cd neovim
-
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        export CFLAGS="-gdwarf-4 -D_DEFAULT_SOURCE"
-        export CXXFLAGS="-gdwarf-4 -D_DEFAULT_SOURCE"
+        # Use pre-built AppImage on Linux
+        mkdir -p "$HOME/.local/bin"
+        curl -Lo "$HOME/.local/bin/nvim" \
+            https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+        chmod +x "$HOME/.local/bin/nvim"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        # Build from source on macOS
+        pushd /tmp > /dev/null
+        rm -rf neovim
+        git clone --depth 1 https://github.com/neovim/neovim
+        cd neovim
+
+        JOBS=$(sysctl -n hw.ncpu 2>/dev/null || echo 1)
+        make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo
+
+        if has_sudo; then
+            sudo make install CMAKE_INSTALL_PREFIX="/usr/local"
+        else
+            make install CMAKE_INSTALL_PREFIX="$HOME/.local"
+        fi
+
+        popd > /dev/null
+        rm -rf /tmp/neovim
     fi
-
-    JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
-    make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo
-
-    if has_sudo; then
-        sudo make install CMAKE_INSTALL_PREFIX="/usr/local"
-    else
-        make install CMAKE_INSTALL_PREFIX="$HOME/.local"
-    fi
-
-    popd > /dev/null
-    rm -rf /tmp/neovim
 fi
