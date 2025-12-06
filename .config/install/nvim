@@ -2,7 +2,8 @@
 
 if ! command -v nvim &> /dev/null; then
     pushd /tmp > /dev/null
-    git clone https://github.com/neovim/neovim
+    rm -rf neovim
+    git clone --depth 1 https://github.com/neovim/neovim
     cd neovim
 
     export CFLAGS="-march=native -gdwarf-4"
