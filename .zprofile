@@ -3,52 +3,55 @@
 # Scratch directory
 
 export SCDIR="$HOME/scratch"
+if [[ -L "$SCDIR" && ! -e "$SCDIR" ]]; then
+    rm "$SCDIR"
+fi
 mkdir -p "/tmp/scratch"
-ln -sfn "/tmp/scratch" $SCDIR
+ln -sfn "/tmp/scratch" "$SCDIR"
 
 # Download directory
 
 export DLDIR="$HOME/downloads"
 mkdir -p "/tmp/downloads"
-ln -sfn "/tmp/downloads" $DLDIR
+ln -sfn "/tmp/downloads" "$DLDIR"
 
 # Bootstrap user-defined paths
 
-if [ ! -f $HOME/.paths/boot ]; then
-  touch $HOME/.paths/boot
-  echo "$HOME/.local/bin" >> $HOME/.paths/boot
+if [[ ! -f "$HOME/.paths/boot" ]]; then
+    touch "$HOME/.paths/boot"
+    echo "$HOME/.local/bin" >> "$HOME/.paths/boot"
 fi
 
-source ~/dev/zu/path read
+# Install and update core programs
 
-# Install homebrew and add paths
+source "$HOME/.config/install/install"
 
-if ! command -v brew &> /dev/null; then
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
+# Init zu
 
-if [ ! -f $HOME/.paths/brew ]; then
-  touch ~/.paths/brew
-  echo $(brew --prefix)/bin >> ~/.paths/brew
-  echo $(brew --prefix)/sbin >> ~/.paths/brew
+source "$HOME/.local/share/zu/path/path" read
+
+# Add homebrew paths if installed
+
+if command -v brew &> /dev/null && [ ! -f "$HOME/.paths/brew" ]; then
+    touch "$HOME/.paths/brew"
+    echo "$(brew --prefix)/bin" >> "$HOME/.paths/brew"
+    echo "$(brew --prefix)/sbin" >> "$HOME/.paths/brew"
 fi
 
 # Load user-defined environment variables
 
-if [ -f ~/.config/shell/env ]; then
-  source ~/.config/shell/env
+if [[ -f "$HOME/.config/shell/env" ]]; then
+    source "$HOME/.config/shell/env"
 fi
 
-# Turn the annoying 'quit unexpectedly' messages into notifications
+# macOS-specific settings
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  defaults write com.apple.CrashReporter UseUNC 1
-fi
+    # Turn 'quit unexpectedly' messages into notifications
+    defaults write com.apple.CrashReporter UseUNC 1
 
-# Custom screenshot location
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  export SSDIR="$HOME/screenshots"
-  mkdir -p "$SSDIR"
-  defaults write com.apple.screencapture location -string "$SSDIR"
+    # Custom screenshot location
+    export SSDIR="$HOME/screenshots"
+    mkdir -p "$SSDIR"
+    defaults write com.apple.screencapture location -string "$SSDIR"
 fi

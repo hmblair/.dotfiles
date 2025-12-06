@@ -1,39 +1,43 @@
 #!/usr/bin/env zsh
 
+# Ensure we stay in emacs mode
+
+bindkey -e
+
 # Init oh-my-posh
 
-if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
-    eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/config.toml)"
+if [[ "$TERM_PROGRAM" != "Apple_Terminal" ]]; then
+    eval "$(oh-my-posh init zsh --config "$HOME/.config/oh-my-posh/config.toml")"
 fi
+
+# Init autocompletions
+
+fpath=(~/.local/share/zu/completions $fpath)
+autoload -Uz compinit
+compinit
 
 # Init fzf
 
 source <(fzf --zsh)
 export FZF_DEFAULT_OPTS_FILE="$HOME/.config/fzf/config"
 
-# Init miniconda
+# Init conda and mamba
 
 if command -v conda &> /dev/null; then
     eval "$(conda "shell.$(basename "${SHELL}")" hook)"
 fi
 
-# Init syntax highlighting
+# Init zsh plugins
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-fi
-
-# Init autosuggestions
-
-source ~/.config/zsh/autosuggestions/zsh-autosuggestions.zsh
+ZSH_PLUGIN_DIR="$HOME/.config/zsh"
+source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
 export ZSH_AUTOSUGGEST_STRATEGY=(completion)
 setopt menu_complete
 
 # Advanced history settings
 
-HISTFILE=~/.zhistory
+HISTFILE="$HOME/.zhistory"
 SAVEHIST=1000
 HISTSIZE=999
 setopt hist_expire_dups_first
@@ -44,8 +48,6 @@ bindkey "^[[B" history-search-forward
 
 # Autocomplete ssh paths; do not complete URLs
 
-autoload -Uz compinit
-compinit
 zstyle ':completion:*:*:argument*' tag-order - '! urls'
 
 # zsh options
@@ -56,5 +58,4 @@ setopt RM_STAR_SILENT
 
 # Import aliases
 
-source ~/.config/shell/aliases
-
+source "$HOME/.config/shell/aliases"

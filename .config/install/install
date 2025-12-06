@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+INSTALL_DIR="$HOME/.config/install"
+
+source "$INSTALL_DIR/zu"
+source "$INSTALL_DIR/zsh-plugins"
+source "$INSTALL_DIR/nvim"
