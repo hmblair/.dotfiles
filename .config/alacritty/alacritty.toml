@@ -1,16 +1,21 @@
-[general]
-  working_directory = "/Users/hmblair"
-
 [env]
   TERM = "xterm-256color"
 
+[scrolling]
+  history = 50000
+
+[cursor]
+  style.shape = "Block"
+  style.blinking = "Off"
+
 [keyboard]
-bindings = [
-  { key = "Right", mods = "Alt", chars = "\u001BF" },
-  { key = "Left",  mods = "Alt", chars = "\u001BB" },
-]
+  bindings = [
+    { key = "Right", mods = "Alt", chars = "\u001BF" },
+    { key = "Left",  mods = "Alt", chars = "\u001BB" },
+  ]
 
 [window]
+  dynamic_title = true
   padding.x = 9
   padding.y = 12
   decorations = "buttonless"
