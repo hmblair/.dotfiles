@@ -1,5 +1,9 @@
 #!/bin/zsh
 
+# Ensure UTF-8 locale
+
+export LC_ALL="${LC_ALL:-en_US.UTF-8}"
+
 # Scratch directory
 
 export SCDIR="$HOME/scratch"
