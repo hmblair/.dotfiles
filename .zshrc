@@ -12,7 +12,6 @@ fi
 
 # Init autocompletions
 
-fpath=(~/.local/share/zu/completions $fpath)
 autoload -Uz compinit
 compinit
 
