@@ -96,3 +96,11 @@ resize() {
   stty cols "$cols" rows "$rows"
 }
 
+btop() {
+  if [[ $COLUMNS -lt 80 || $LINES -lt 24 ]]; then
+    command btop --preset 1 "$@"
+  else
+    command btop "$@"
+  fi
+}
+
