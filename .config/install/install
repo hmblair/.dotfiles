@@ -1,5 +1,13 @@
 #!/usr/bin/env zsh
 
+# Parse arguments
+FORCE=0
+for arg in "$@"; do
+    case "$arg" in
+        -f|--force) FORCE=1 ;;
+    esac
+done
+
 INSTALL_DIR="$HOME/.config/install"
 LOG_DIR="$HOME/.local/log/install"
 mkdir -p "$LOG_DIR"
@@ -42,7 +50,7 @@ for script in "$INSTALL_DIR"/*; do
     [[ -f "$script" && -x "$script" ]] || continue
 
     cmd="${INSTALL_CMDS[$name]}"
-    if [[ -n "$cmd" ]] && ! command -v "$cmd" &>/dev/null; then
+    if [[ -n "$cmd" ]] && { (( FORCE )) || ! command -v "$cmd" &>/dev/null; }; then
         if (( INSTALL_GLOBAL[$name] )) && command -v sudo &>/dev/null; then
             GLOBAL_INSTALLS+=("$name")
         else

@@ -13,12 +13,12 @@ if [[ ! -d "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting" ]]; then
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
         "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting" || return 1
 else
-    (cd "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting" && git pull --quiet 2>/dev/null &)
+    (cd "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting" && git pull --rebase --quiet 2>/dev/null &)
 fi
 
 if [[ ! -d "$ZSH_PLUGIN_DIR/zsh-autosuggestions" ]]; then
     git clone https://github.com/zsh-users/zsh-autosuggestions.git \
         "$ZSH_PLUGIN_DIR/zsh-autosuggestions" || return 1
 else
-    (cd "$ZSH_PLUGIN_DIR/zsh-autosuggestions" && git pull --quiet 2>/dev/null &)
+    (cd "$ZSH_PLUGIN_DIR/zsh-autosuggestions" && git pull --rebase --quiet 2>/dev/null &)
 fi
