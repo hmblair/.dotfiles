@@ -5,11 +5,13 @@ if [[ -x "$LOCAL_PREFIX/bin/stow" ]] || command -v stow >/dev/null 2>&1; then
     return 0 2>/dev/null || exit 0
 fi
 
-# Stow requires Perl
-if ! command -v perl >/dev/null 2>&1; then
-    echo "Error: Perl is required but not installed"
-    return 1 2>/dev/null || exit 1
-fi
+# Check dependencies
+for cmd in perl curl tar make; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "Error: $cmd is required but not installed"
+        return 1 2>/dev/null || exit 1
+    fi
+done
 
 # Build from source
 STOW_VERSION="2.4.0"

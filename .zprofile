@@ -51,7 +51,7 @@ else
     printf "  %-20s\033[0;31m%s\033[0m\n" "zu" "FAILED (see $LOG_DIR/zu.log)"
 fi
 unset _zu_existed
-source "$LOCAL_PREFIX/share/zu/path/path" read
+[[ -f "$LOCAL_PREFIX/share/zu/path/path" ]] && source "$LOCAL_PREFIX/share/zu/path/path" read
 
 # Add homebrew paths if installed
 

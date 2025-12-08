@@ -1,5 +1,11 @@
 #!/usr/bin/env zsh
 
+# Check dependencies
+if ! command -v git &>/dev/null; then
+    echo "Error: git is required but not installed"
+    return 1
+fi
+
 ZU_DIR="$LOCAL_PREFIX/share/zu"
 
 if [[ ! -d "$ZU_DIR" ]]; then

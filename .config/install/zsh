@@ -5,6 +5,20 @@ if command -v zsh >/dev/null 2>&1; then
     return 0 2>/dev/null || exit 0
 fi
 
+# Check dependencies
+for cmd in curl tar make; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "Error: $cmd is required but not installed"
+        return 1 2>/dev/null || exit 1
+    fi
+done
+
+# Check for xz support (needed for .tar.xz)
+if ! command -v xz &>/dev/null && ! tar --help 2>&1 | grep -q xz; then
+    echo "Error: xz is required but not installed (for .tar.xz extraction)"
+    return 1 2>/dev/null || exit 1
+fi
+
 # Build from source
 ZSH_VERSION="5.9"
 ZSH_URL="https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.xz/download"

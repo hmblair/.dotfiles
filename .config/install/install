@@ -10,9 +10,10 @@ _RED='\033[0;31m'
 _CYAN='\033[0;36m'
 _NC='\033[0m'
 
-# Install configuration
-export GLOBAL_PREFIX="/usr/local"
-export LOCAL_PREFIX="$HOME/.local"
+# Install configuration (use env vars from .zprofile, with fallbacks)
+: "${GLOBAL_PREFIX:=/usr/local}"
+: "${LOCAL_PREFIX:=$HOME/.local}"
+export GLOBAL_PREFIX LOCAL_PREFIX
 export JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
 # Map script names to: command, global (1=sudo, 0=local)
@@ -57,13 +58,29 @@ if (( ${#GLOBAL_INSTALLS[@]} > 0 )); then
     printf "${_CYAN}global install:${_NC} %s\n" "${(j:, :)GLOBAL_INSTALLS}"
     printf "${_CYAN}(Ctrl+C to skip global installs)${_NC}\n"
 
-    # Build script to run as root (-E preserves environment)
-    sudo -E zsh -c "
+    # Install brew dependencies before sudo (Homebrew should not run as root)
+    if [[ "$OSTYPE" == "darwin"* ]] && command -v brew &>/dev/null; then
+        for name in "${GLOBAL_INSTALLS[@]}"; do
+            case "$name" in
+                btop) brew install coreutils make gcc lowdown 2>/dev/null ;;
+            esac
+        done
+    fi
+
+    # Build script to run as root (pass only necessary env vars for security)
+    sudo zsh -c "
         export PREFIX='$GLOBAL_PREFIX'
         export LOCAL_PREFIX='$LOCAL_PREFIX'
         export GLOBAL_PREFIX='$GLOBAL_PREFIX'
         export USE_SUDO=1
         export JOBS=$JOBS
+        export PATH='$PATH'
+        export CC='${CC:-}'
+        export CXX='${CXX:-}'
+        export CFLAGS='${CFLAGS:-}'
+        export CXXFLAGS='${CXXFLAGS:-}'
+        export CPPFLAGS='${CPPFLAGS:-}'
+        export LDFLAGS='${LDFLAGS:-}'
 
         for name in ${(j: :)GLOBAL_INSTALLS}; do
             log_file='$LOG_DIR/'\$name'.log'

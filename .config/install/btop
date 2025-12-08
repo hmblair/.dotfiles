@@ -1,12 +1,16 @@
 #!/usr/bin/env zsh
 
 if ! command -v btop &> /dev/null; then
-    # Install build dependencies
+    # Check dependencies
+    if ! command -v git &>/dev/null; then
+        echo "Error: git is required but not installed"
+        return 1
+    fi
+
+    # Set make command (brew dependencies installed by main install script)
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        if command -v brew &> /dev/null; then
-            brew install coreutils make gcc lowdown
-        else
-            echo "Homebrew not found. Install Homebrew first."
+        if ! command -v gmake &>/dev/null; then
+            echo "Error: gmake not found. Install with: brew install make"
             return 1
         fi
         MAKE="gmake"

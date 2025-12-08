@@ -1,6 +1,14 @@
 #!/usr/bin/env zsh
 
 if ! command -v nvim &> /dev/null; then
+    # Check dependencies
+    for cmd in git cmake make; do
+        if ! command -v "$cmd" &>/dev/null; then
+            echo "Error: $cmd is required but not installed"
+            return 1
+        fi
+    done
+
     pushd /tmp > /dev/null
     rm -rf neovim
     git clone --depth 1 https://github.com/neovim/neovim

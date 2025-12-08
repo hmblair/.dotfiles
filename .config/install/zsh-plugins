@@ -1,5 +1,11 @@
 #!/usr/bin/env zsh
 
+# Check dependencies
+if ! command -v git &>/dev/null; then
+    echo "Error: git is required but not installed"
+    return 1
+fi
+
 ZSH_PLUGIN_DIR="$LOCAL_PREFIX/zsh"
 mkdir -p "$ZSH_PLUGIN_DIR"
 

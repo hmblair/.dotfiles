@@ -6,7 +6,7 @@ bindkey -e
 
 # Init oh-my-posh
 
-if [[ "$TERM_PROGRAM" != "Apple_Terminal" ]]; then
+if [[ "$TERM_PROGRAM" != "Apple_Terminal" ]] && command -v oh-my-posh &>/dev/null; then
     eval "$(oh-my-posh init zsh --config "$HOME/.config/oh-my-posh/config.toml")"
 fi
 
@@ -18,8 +18,10 @@ compinit
 
 # Init fzf
 
-source <(fzf --zsh)
-export FZF_DEFAULT_OPTS_FILE="$HOME/.config/fzf/config"
+if command -v fzf &>/dev/null; then
+    source <(fzf --zsh)
+    export FZF_DEFAULT_OPTS_FILE="$HOME/.config/fzf/config"
+fi
 
 # Init conda and mamba
 
@@ -29,9 +31,11 @@ fi
 
 # Init zsh plugins
 
-ZSH_PLUGIN_DIR="$LOCAL_PREFIX/zsh"
-source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
+ZSH_PLUGIN_DIR="${LOCAL_PREFIX:-$HOME/.local}/zsh"
+[[ -f "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] && \
+    source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+[[ -f "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] && \
+    source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
 export ZSH_AUTOSUGGEST_STRATEGY=(completion)
 setopt menu_complete
 
