@@ -1,21 +1,20 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 # Skip if stow already installed
-if [ -x "$HOME/.local/bin/stow" ] || command -v stow >/dev/null 2>&1; then
+if [[ -x "$LOCAL_PREFIX/bin/stow" ]] || command -v stow >/dev/null 2>&1; then
     return 0 2>/dev/null || exit 0
 fi
 
 # Stow requires Perl
 if ! command -v perl >/dev/null 2>&1; then
     echo "Error: Perl is required but not installed"
-    exit 1
+    return 1 2>/dev/null || exit 1
 fi
 
 # Build from source
 STOW_VERSION="2.4.0"
 STOW_URL="https://ftp.gnu.org/gnu/stow/stow-${STOW_VERSION}.tar.gz"
 BUILD_DIR="/tmp/stow-build-$$"
-PREFIX="$HOME/.local"
 
 mkdir -p "$BUILD_DIR" "$PREFIX"
 
@@ -32,8 +31,6 @@ mkdir -p "$BUILD_DIR" "$PREFIX"
 
     echo "Installing to $PREFIX..."
     make install || exit 1
-)
+) || { rm -rf "$BUILD_DIR"; return 1; }
 
 rm -rf "$BUILD_DIR"
-
-echo "stow installed to $PREFIX/bin/stow"

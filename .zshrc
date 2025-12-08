@@ -29,7 +29,7 @@ fi
 
 # Init zsh plugins
 
-ZSH_PLUGIN_DIR="$HOME/.config/zsh"
+ZSH_PLUGIN_DIR="$LOCAL_PREFIX/zsh"
 source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
 export ZSH_AUTOSUGGEST_STRATEGY=(completion)

@@ -1,9 +1,98 @@
 #!/usr/bin/env zsh
 
 INSTALL_DIR="$HOME/.config/install"
+LOG_DIR="$HOME/.local/log/install"
+mkdir -p "$LOG_DIR"
 
-source "$INSTALL_DIR/zu"
-source "$INSTALL_DIR/zsh-plugins"
-source "$INSTALL_DIR/stow"
-source "$INSTALL_DIR/oh-my-posh"
-source "$INSTALL_DIR/nvim"
+# Colors
+_GREEN='\033[0;32m'
+_RED='\033[0;31m'
+_CYAN='\033[0;36m'
+_NC='\033[0m'
+
+# Install configuration
+export GLOBAL_PREFIX="/usr/local"
+export LOCAL_PREFIX="$HOME/.local"
+export JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
+
+# Map script names to: command, global (1=sudo, 0=local)
+declare -A INSTALL_CMDS=(
+    [btop]=btop
+    [nvim]=nvim
+    [oh-my-posh]=oh-my-posh
+    [stow]=stow
+    [zsh]=zsh
+    [zsh-plugins]=
+)
+declare -A INSTALL_GLOBAL=(
+    [btop]=1
+    [nvim]=1
+    [oh-my-posh]=0
+    [stow]=0
+    [zsh]=0
+    [zsh-plugins]=0
+)
+
+# Find what needs installing, separate global vs local
+typeset -a GLOBAL_INSTALLS LOCAL_INSTALLS
+for script in "$INSTALL_DIR"/*; do
+    name="$(basename "$script")"
+    [[ "$name" == "install" || "$name" == "zu" ]] && continue
+    [[ -f "$script" && -x "$script" ]] || continue
+
+    cmd="${INSTALL_CMDS[$name]}"
+    if [[ -n "$cmd" ]] && ! command -v "$cmd" &>/dev/null; then
+        if (( INSTALL_GLOBAL[$name] )) && command -v sudo &>/dev/null; then
+            GLOBAL_INSTALLS+=("$name")
+        else
+            LOCAL_INSTALLS+=("$name")
+        fi
+    elif [[ -z "$cmd" ]]; then
+        source "$script" > "$LOG_DIR/$name.log" 2>&1
+    fi
+done
+
+# Run global installs in a single sudo shell
+if (( ${#GLOBAL_INSTALLS[@]} > 0 )); then
+    printf "${_CYAN}global install:${_NC} %s\n" "${(j:, :)GLOBAL_INSTALLS}"
+    printf "${_CYAN}(Ctrl+C to skip global installs)${_NC}\n"
+
+    # Build script to run as root (-E preserves environment)
+    sudo -E zsh -c "
+        export PREFIX='$GLOBAL_PREFIX'
+        export LOCAL_PREFIX='$LOCAL_PREFIX'
+        export GLOBAL_PREFIX='$GLOBAL_PREFIX'
+        export USE_SUDO=1
+        export JOBS=$JOBS
+
+        for name in ${(j: :)GLOBAL_INSTALLS}; do
+            log_file='$LOG_DIR/'\$name'.log'
+            printf '  %-20s' \"\$name\"
+            if source '$INSTALL_DIR/'\$name > \"\$log_file\" 2>&1; then
+                printf '\033[0;32m%s\033[0m\n' '$GLOBAL_PREFIX/bin/'\"\${name}\"
+            else
+                printf '\033[0;31m%s\033[0m\n' 'FAILED (see '\"\$log_file\"')'
+            fi
+        done
+    "
+fi
+
+# Run local installs normally
+if (( ${#LOCAL_INSTALLS[@]} > 0 )); then
+    printf "${_CYAN}local install:${_NC} %s\n" "${(j:, :)LOCAL_INSTALLS}"
+
+    export PREFIX="$LOCAL_PREFIX"
+    export USE_SUDO=0
+
+    for name in "${LOCAL_INSTALLS[@]}"; do
+        cmd="${INSTALL_CMDS[$name]}"
+        log_file="$LOG_DIR/$name.log"
+
+        printf "  %-20s" "$name"
+        if source "$INSTALL_DIR/$name" > "$log_file" 2>&1; then
+            printf "${_GREEN}%s${_NC}\n" "$PREFIX/bin/$cmd"
+        else
+            printf "${_RED}%s${_NC}\n" "FAILED (see $log_file)"
+        fi
+    done
+fi

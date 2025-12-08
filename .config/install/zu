@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
 
-ZU_DIR="$HOME/.local/share/zu"
+ZU_DIR="$LOCAL_PREFIX/share/zu"
 
 if [[ ! -d "$ZU_DIR" ]]; then
-    git clone https://github.com/hmblair/zu.git "$ZU_DIR"
-    zsh "$ZU_DIR/configure" >/dev/null
+    git clone https://github.com/hmblair/zu.git "$ZU_DIR" || return 1
+    zsh "$ZU_DIR/configure" >/dev/null || return 1
 else
     (cd "$ZU_DIR" && git pull --quiet && zsh ./configure >/dev/null 2>&1 &)
 fi

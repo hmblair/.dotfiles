@@ -1,0 +1,28 @@
+#!/usr/bin/env zsh
+
+if ! command -v btop &> /dev/null; then
+    # Install build dependencies
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if command -v brew &> /dev/null; then
+            brew install coreutils make gcc lowdown
+        else
+            echo "Homebrew not found. Install Homebrew first."
+            return 1
+        fi
+        MAKE="gmake"
+    else
+        MAKE="make"
+    fi
+
+    pushd /tmp > /dev/null
+    rm -rf btop
+    git clone --depth 1 https://github.com/aristocratos/btop.git
+    cd btop
+
+    $MAKE -j"$JOBS" PREFIX="$PREFIX" || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
+    $MAKE install PREFIX="$PREFIX" || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
+    [[ "$OSTYPE" == "linux-gnu"* ]] && $MAKE setcap
+
+    popd > /dev/null
+    rm -rf /tmp/btop
+fi

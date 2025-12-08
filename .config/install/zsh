@@ -1,15 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 # Skip if zsh already installed
 if command -v zsh >/dev/null 2>&1; then
-    exit 0
+    return 0 2>/dev/null || exit 0
 fi
 
 # Build from source
 ZSH_VERSION="5.9"
 ZSH_URL="https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.xz/download"
 BUILD_DIR="/tmp/zsh-build-$$"
-PREFIX="$HOME/.local"
 
 mkdir -p "$BUILD_DIR" "$PREFIX"
 
@@ -25,25 +24,26 @@ mkdir -p "$BUILD_DIR" "$PREFIX"
     ./configure --prefix="$PREFIX" || exit 1
 
     echo "Building..."
-    JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
     make -j"$JOBS" || exit 1
 
     echo "Installing to $PREFIX..."
     make install || exit 1
-)
+) || { rm -rf "$BUILD_DIR"; return 1; }
 
 rm -rf "$BUILD_DIR"
 
-# Add zsh exec to .bashrc if not already present
-BASHRC="$HOME/.bashrc"
-EXEC_LINE='[ -x "$HOME/.local/bin/zsh" ] && unset PS1 && export MODULESHOME && exec "$HOME/.local/bin/zsh" -l'
+# Add zsh exec to .bashrc if not already present (only for local installs)
+if (( ! USE_SUDO )); then
+    BASHRC="$HOME/.bashrc"
+    EXEC_LINE='[ -x "$HOME/.local/bin/zsh" ] && unset PS1 && export MODULESHOME && exec "$HOME/.local/bin/zsh" -l'
 
-if [ -f "$BASHRC" ]; then
-    if ! grep -qF '.local/bin/zsh' "$BASHRC"; then
-        echo "$EXEC_LINE" >> "$BASHRC"
+    if [[ -f "$BASHRC" ]]; then
+        if ! grep -qF '.local/bin/zsh' "$BASHRC"; then
+            echo "$EXEC_LINE" >> "$BASHRC"
+        fi
+    else
+        echo "$EXEC_LINE" > "$BASHRC"
     fi
-else
-    echo "$EXEC_LINE" > "$BASHRC"
 fi
 
 echo "zsh installed to $PREFIX/bin/zsh"

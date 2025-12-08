@@ -1,5 +1,9 @@
 #!/bin/zsh
 
+# Unified install prefixes
+export LOCAL_PREFIX="$HOME/.local"
+export GLOBAL_PREFIX="/usr/local"
+
 # Ensure UTF-8 locale
 
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
@@ -23,7 +27,7 @@ ln -sfn "/tmp/downloads" "$DLDIR"
 
 if [[ ! -f "$HOME/.paths/boot" ]]; then
     touch "$HOME/.paths/boot"
-    echo "$HOME/.local/bin" >> "$HOME/.paths/boot"
+    echo "$LOCAL_PREFIX/bin" >> "$HOME/.paths/boot"
 fi
 
 # Init lmod if available (before installs so we can use modules)
@@ -32,13 +36,22 @@ if [[ -n "$MODULESHOME" && -f "$MODULESHOME/init/zsh" ]]; then
     source "$MODULESHOME/init/zsh"
 fi
 
-# Install and update core programs
+# Install and init zu (before envs, as envs depends on zu)
 
-source "$HOME/.config/install/install"
-
-# Init zu
-
-source "$HOME/.local/share/zu/path/path" read
+LOG_DIR="$LOCAL_PREFIX/log/install"
+mkdir -p "$LOG_DIR"
+_zu_existed=0
+[[ -d "$LOCAL_PREFIX/share/zu" ]] && _zu_existed=1
+: > "$LOG_DIR/zu.log"
+if source "$HOME/.config/install/zu" > "$LOG_DIR/zu.log" 2>&1; then
+    if (( !_zu_existed )) && [[ -d "$LOCAL_PREFIX/share/zu" ]]; then
+        printf "  %-20s\033[0;32m%s\033[0m\n" "zu" "OK"
+    fi
+else
+    printf "  %-20s\033[0;31m%s\033[0m\n" "zu" "FAILED (see $LOG_DIR/zu.log)"
+fi
+unset _zu_existed
+source "$LOCAL_PREFIX/share/zu/path/path" read
 
 # Add homebrew paths if installed
 
@@ -51,6 +64,11 @@ fi
 # Load user-defined environment variables
 
 eval "$(envs read)"
+
+# Install and update core programs
+
+source "$HOME/.config/install/install"
+
 
 # macOS-specific settings
 

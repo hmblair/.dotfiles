@@ -1,40 +1,23 @@
 #!/usr/bin/env zsh
 
-# Check if sudo is available (not blocked/fake)
-has_sudo() {
-    command -v sudo >/dev/null 2>&1 || return 1
-    sudo -n true 2>&1 | grep -qiE "(no sudo|not allowed|sorry)" && return 1
-    return 0
-}
-
 if ! command -v nvim &> /dev/null; then
     pushd /tmp > /dev/null
     rm -rf neovim
     git clone --depth 1 https://github.com/neovim/neovim
     cd neovim
 
-    JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
-
-    if has_sudo; then
-        PREFIX="/usr/local"
-    else
-        PREFIX="$HOME/.local"
-    fi
-
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo \
             CMAKE_INSTALL_PREFIX="$PREFIX" \
             CMAKE_EXTRA_FLAGS="-DCMAKE_C_FLAGS='-gdwarf-4'" \
-            DEPS_CMAKE_FLAGS="-DTREESITTER_ARGS=-DCMAKE_C_FLAGS='-D_BSD_SOURCE -gdwarf-4'"
+            DEPS_CMAKE_FLAGS="-DTREESITTER_ARGS=-DCMAKE_C_FLAGS='-D_BSD_SOURCE -gdwarf-4'" \
+            || { popd > /dev/null; rm -rf /tmp/neovim; return 1; }
     else
-        make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX"
+        make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX" \
+            || { popd > /dev/null; rm -rf /tmp/neovim; return 1; }
     fi
 
-    if has_sudo; then
-        sudo make install
-    else
-        make install
-    fi
+    make install || { popd > /dev/null; rm -rf /tmp/neovim; return 1; }
 
     popd > /dev/null
     rm -rf /tmp/neovim
