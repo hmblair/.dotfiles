@@ -22,15 +22,6 @@ source() {
   fi
 }
 
-png() {
-  if ! has_cmd magick; then
-    echo "error: imagemagick is not installed." >&2
-    return 1
-  fi
-  local file="$1"
-  magick -quality 100 -density 600 "$file" "${file%.*}.png"
-}
-
 ssh-terminfo() {
   infocmp -x | ssh "$1" 'mkdir -p ~/.terminfo && tic -x -'
   ssh "$1" 'grep -qF "resize()" ~/.bashrc 2>/dev/null || cat >> ~/.bashrc << '\''EOF'\''
