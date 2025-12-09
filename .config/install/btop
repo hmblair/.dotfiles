@@ -21,9 +21,9 @@ if ! command -v btop &> /dev/null; then
     pushd /tmp > /dev/null
     rm -rf btop
 
-    # Use v1.3.2 for GCC < 13 (lacks full C++23 std::ranges::to support)
+    # Use v1.3.2 for GCC < 14 (std::ranges::to requires GCC 14+)
     GCC_VER=$(${CXX:-c++} -dumpversion 2>/dev/null | cut -d. -f1)
-    if [[ -n "$GCC_VER" && "$GCC_VER" -lt 13 ]]; then
+    if [[ -n "$GCC_VER" && "$GCC_VER" -lt 14 ]]; then
         BTOP_TAG="v1.3.2"
     else
         BTOP_TAG=""  # latest
