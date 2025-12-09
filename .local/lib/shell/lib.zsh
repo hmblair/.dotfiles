@@ -80,13 +80,15 @@ has_cmd() {
 # Usage: safe_eval <cmd> [--warn]
 # Returns 0 if command missing (no-op) or eval'd successfully
 safe_eval() {
-  local cmd="$1" output
+  local cmd="$1" output exitcode
   if has_cmd "${cmd%% *}"; then
-    output="$(eval "$cmd" 2>/dev/null)"
-    if [[ $? -eq 0 && -n "$output" ]]; then
+    output="$(eval "$cmd" 2>&1)"
+    exitcode=$?
+    if [[ $exitcode -eq 0 && -n "$output" ]]; then
       eval "$output"
     elif [[ "$2" == "--warn" ]]; then
-      warn "failed to eval: $cmd"
+      warn "failed to eval: $cmd (exit $exitcode)"
+      [[ -n "$output" ]] && warn "  $output"
     fi
   fi
   return 0
