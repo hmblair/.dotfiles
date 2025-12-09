@@ -24,10 +24,13 @@ _NC='\033[0m'
 export GLOBAL_PREFIX LOCAL_PREFIX
 export JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
-# Check if real sudo is available (not a wrapper like Sherlock's)
+# Check if user wants global installs (requires sudo)
 HAS_SUDO=0
-if sudo --version &>/dev/null; then
-    HAS_SUDO=1
+if [[ -t 0 ]]; then
+    printf "${_CYAN}Enable global installs (requires sudo)? [y/N] ${_NC}"
+    read -r -k 1 response
+    [[ "$response" =~ ^[Yy]$ ]] && HAS_SUDO=1
+    echo
 fi
 
 # Map script names to: command, global (1=sudo, 0=local)
