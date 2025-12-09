@@ -45,8 +45,8 @@ safe_source "${MODULESHOME}/init/zsh"
 LOG_DIR="$LOCAL_PREFIX/log/install"
 run_install "zu" "$HOME/.config/install/zu" "$LOG_DIR"
 
-# Load paths (zu must be available)
-export PATH="$LOCAL_PREFIX/share/zu/bin:$PATH"
+# Load paths (zu must be available, and scripts need zsh in PATH)
+export PATH="$LOCAL_PREFIX/bin:$LOCAL_PREFIX/share/zu/bin:$PATH"
 safe_eval "path read" --warn
 
 # Bootstrap homebrew paths if needed
