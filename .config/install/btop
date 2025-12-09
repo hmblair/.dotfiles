@@ -36,7 +36,11 @@ if ! command -v btop &> /dev/null; then
     fi
     cd btop
 
-    $MAKE -j"$JOBS" PREFIX="$PREFIX" || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
+    # Disable GPU support on Linux (avoids -ldl linking issues on some systems)
+    GPU_FLAG=""
+    [[ "$OSTYPE" == "linux-gnu"* ]] && GPU_FLAG="GPU_SUPPORT=false"
+
+    $MAKE -j"$JOBS" PREFIX="$PREFIX" $GPU_FLAG || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
     $MAKE install PREFIX="$PREFIX" || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
     [[ "$OSTYPE" == "linux-gnu"* ]] && $MAKE setcap
 
