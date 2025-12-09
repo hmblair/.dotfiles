@@ -33,6 +33,7 @@ done
 # Map script names to: command, global (1=sudo, 0=local)
 declare -A INSTALL_CMDS=(
     [btop]=btop
+    [ninja]=ninja
     [nvim]=nvim
     [oh-my-posh]=oh-my-posh
     [stow]=stow
@@ -41,6 +42,7 @@ declare -A INSTALL_CMDS=(
 )
 declare -A INSTALL_GLOBAL=(
     [btop]=1
+    [ninja]=0
     [nvim]=1
     [oh-my-posh]=0
     [stow]=0

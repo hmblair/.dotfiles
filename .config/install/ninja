@@ -1,0 +1,47 @@
+#!/usr/bin/env zsh
+
+if ! command -v ninja &> /dev/null || [[ "$(command -v ninja)" == *".local/bin/ninja" && -f "$(command -v ninja)" && "$(head -1 "$(command -v ninja)" 2>/dev/null)" == "#!"*"python"* ]]; then
+    # Either ninja not found, or it's a broken Python wrapper
+    # Install the real ninja binary
+
+    pushd /tmp > /dev/null
+    rm -rf ninja-build
+
+    # Get latest release version
+    NINJA_VERSION=$(curl -s https://api.github.com/repos/ninja-build/ninja/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+    [[ -z "$NINJA_VERSION" ]] && NINJA_VERSION="v1.12.1"
+
+    # Determine platform
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        NINJA_PLATFORM="mac"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        NINJA_PLATFORM="linux"
+    else
+        echo "Error: Unsupported platform: $OSTYPE"
+        return 1
+    fi
+
+    # Download and install
+    NINJA_URL="https://github.com/ninja-build/ninja/releases/download/${NINJA_VERSION}/ninja-${NINJA_PLATFORM}.zip"
+    echo "Downloading ninja ${NINJA_VERSION} for ${NINJA_PLATFORM}..."
+
+    mkdir -p ninja-build && cd ninja-build
+    if ! curl -sLO "$NINJA_URL"; then
+        echo "Error: Failed to download ninja"
+        popd > /dev/null
+        rm -rf /tmp/ninja-build
+        return 1
+    fi
+
+    unzip -q "ninja-${NINJA_PLATFORM}.zip"
+    mkdir -p "$PREFIX/bin"
+
+    # Remove broken Python wrapper if it exists
+    [[ -f "$PREFIX/bin/ninja" ]] && rm -f "$PREFIX/bin/ninja"
+
+    mv ninja "$PREFIX/bin/"
+    chmod +x "$PREFIX/bin/ninja"
+
+    popd > /dev/null
+    rm -rf /tmp/ninja-build
+fi

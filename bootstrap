@@ -17,6 +17,7 @@ _NC='\033[0m'
 info() { printf "${_CYAN}==> %s${_NC}\n" "$1"; }
 success() { printf "${_GREEN}==> %s${_NC}\n" "$1"; }
 error() { printf "${_RED}==> %s${_NC}\n" "$1" >&2; }
+detail() { printf "    %s\n" "$1"; }
 
 mkdir -p "$LOG_DIR"
 
@@ -24,9 +25,14 @@ mkdir -p "$LOG_DIR"
 # Step 0: Check prerequisites
 # ─────────────────────────────────────────────────────────────────────────────
 
+info "Checking prerequisites..."
 MISSING=""
 for cmd in git curl make perl tar; do
-  command -v "$cmd" &>/dev/null || MISSING="$MISSING $cmd"
+  if command -v "$cmd" &>/dev/null; then
+    detail "$cmd: $(command -v "$cmd")"
+  else
+    MISSING="$MISSING $cmd"
+  fi
 done
 
 if [[ -n "$MISSING" ]]; then
@@ -40,13 +46,20 @@ if [[ -n "$MISSING" ]]; then
   fi
   exit 1
 fi
+success "All prerequisites found"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Step 1: Install stow (needed to symlink dotfiles)
 # ─────────────────────────────────────────────────────────────────────────────
 
-if ! command -v stow &>/dev/null && [[ ! -x "$LOCAL_PREFIX/bin/stow" ]]; then
+if command -v stow &>/dev/null; then
+  info "stow already installed: $(command -v stow)"
+elif [[ -x "$LOCAL_PREFIX/bin/stow" ]]; then
+  info "stow already installed: $LOCAL_PREFIX/bin/stow"
+  export PATH="$LOCAL_PREFIX/bin:$PATH"
+else
   info "Installing stow..."
+  detail "Log: $LOG_DIR/stow.log"
   export PREFIX="$LOCAL_PREFIX"
   if source "$DOTFILES_DIR/.config/install/stow" > "$LOG_DIR/stow.log" 2>&1; then
     export PATH="$LOCAL_PREFIX/bin:$PATH"
@@ -62,6 +75,8 @@ fi
 # ─────────────────────────────────────────────────────────────────────────────
 
 info "Linking dotfiles..."
+detail "Source: $DOTFILES_DIR"
+detail "Target: $HOME"
 cd "$DOTFILES_DIR"
 if stow . -t ~ 2>"$LOG_DIR/stow-link.log"; then
   success "Dotfiles linked"
@@ -76,15 +91,20 @@ fi
 
 info "Running shell setup..."
 if command -v zsh &>/dev/null; then
+  detail "zsh: $(command -v zsh)"
+  detail "Sourcing $HOME/.zprofile"
   zsh -c "source '$HOME/.zprofile'"
 else
   # Install zsh first, then run setup
+  info "Installing zsh (not found in PATH)..."
+  detail "Log: $LOG_DIR/zsh.log"
   export PREFIX="$LOCAL_PREFIX"
   export LOCAL_PREFIX
   export GLOBAL_PREFIX="/usr/local"
   if bash "$DOTFILES_DIR/.config/install/zsh" > "$LOG_DIR/zsh.log" 2>&1; then
     success "zsh installed to $LOCAL_PREFIX/bin/zsh"
     export PATH="$LOCAL_PREFIX/bin:$PATH"
+    detail "Sourcing $HOME/.zprofile"
     zsh -c "source '$HOME/.zprofile'"
   else
     error "Failed to install zsh (see $LOG_DIR/zsh.log)"

@@ -2,7 +2,7 @@
 
 if ! command -v nvim &> /dev/null; then
     # Check dependencies
-    for cmd in git cmake make; do
+    for cmd in git cmake make ninja; do
         if ! command -v "$cmd" &>/dev/null; then
             echo "Error: $cmd is required but not installed"
             return 1
