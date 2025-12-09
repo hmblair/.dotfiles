@@ -24,14 +24,11 @@ _NC='\033[0m'
 export GLOBAL_PREFIX LOCAL_PREFIX
 export JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
-# Check if user wants global installs (requires sudo)
+# Global installs disabled by default (run install script directly with --global to enable)
 HAS_SUDO=0
-if [[ -t 0 ]]; then
-    printf "${_CYAN}Enable global installs (requires sudo)? [y/N] ${_NC}"
-    read -r -k 1 response
-    [[ "$response" =~ ^[Yy]$ ]] && HAS_SUDO=1
-    echo
-fi
+for arg in "$@"; do
+    [[ "$arg" == "--global" ]] && HAS_SUDO=1
+done
 
 # Map script names to: command, global (1=sudo, 0=local)
 declare -A INSTALL_CMDS=(
