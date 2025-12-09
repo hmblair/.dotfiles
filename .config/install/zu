@@ -9,8 +9,14 @@ fi
 ZU_DIR="$LOCAL_PREFIX/share/zu"
 
 if [[ ! -d "$ZU_DIR" ]]; then
+    # Fresh install: show errors
     git clone https://github.com/hmblair/zu.git "$ZU_DIR" || return 1
     zsh "$ZU_DIR/configure" >/dev/null || return 1
 else
-    (cd "$ZU_DIR" && git pull --rebase --quiet && zsh ./configure >/dev/null 2>&1 &)
+    # Already installed: update in background, log errors but don't fail
+    (
+        cd "$ZU_DIR" && \
+        git pull --rebase --quiet 2>&1 && \
+        zsh ./configure 2>&1
+    ) >> "${LOG_DIR:-$HOME/.local/log/install}/zu-update.log" 2>&1 &
 fi
