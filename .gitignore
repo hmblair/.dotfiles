@@ -1,4 +1,5 @@
 .DS_Store
+*.log
 
 # Ignore everything in .config by default
 .config/*
