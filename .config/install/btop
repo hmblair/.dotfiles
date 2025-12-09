@@ -36,9 +36,39 @@ if ! command -v btop &> /dev/null; then
     fi
     cd btop
 
-    # Disable GPU support on Linux (avoids -ldl linking issues on some systems)
+    # GPU support on Linux: enable if NVIDIA drivers and libdl are available
     GPU_FLAG=""
-    [[ "$OSTYPE" == "linux-gnu"* ]] && GPU_FLAG="GPU_SUPPORT=false"
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        GPU_SUPPORT=false
+
+        # Check for NVIDIA: need libnvidia-ml.so and libdl
+        if command -v nvidia-smi &>/dev/null; then
+            # nvidia-smi exists, check for required libraries
+            NVML_LIB=$(ldconfig -p 2>/dev/null | grep -m1 'libnvidia-ml.so' | awk '{print $NF}')
+            DL_LIB=$(ldconfig -p 2>/dev/null | grep -m1 'libdl.so' | awk '{print $NF}')
+
+            # On newer glibc (2.34+), libdl is merged into libc
+            if [[ -z "$DL_LIB" ]]; then
+                # Check if we can link against -ldl anyway (glibc provides it)
+                echo 'int main(){}' > /tmp/dl_test.c
+                if ${CC:-cc} -o /tmp/dl_test /tmp/dl_test.c -ldl 2>/dev/null; then
+                    DL_LIB="builtin"
+                fi
+                rm -f /tmp/dl_test.c /tmp/dl_test
+            fi
+
+            if [[ -n "$NVML_LIB" && -n "$DL_LIB" ]]; then
+                echo "NVIDIA GPU support: enabled (found libnvidia-ml and libdl)"
+                GPU_SUPPORT=true
+            else
+                echo "NVIDIA GPU support: disabled (missing libs: ${NVML_LIB:-libnvidia-ml} ${DL_LIB:-libdl})"
+            fi
+        else
+            echo "GPU support: disabled (nvidia-smi not found)"
+        fi
+
+        [[ "$GPU_SUPPORT" == "false" ]] && GPU_FLAG="GPU_SUPPORT=false"
+    fi
 
     $MAKE -j"$JOBS" PREFIX="$PREFIX" $GPU_FLAG || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
     $MAKE install PREFIX="$PREFIX" || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
