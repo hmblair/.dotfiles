@@ -24,9 +24,9 @@ _NC='\033[0m'
 export GLOBAL_PREFIX LOCAL_PREFIX
 export JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
-# Check if passwordless sudo is available (real sudo is silent)
+# Check if real sudo is available (not a wrapper like Sherlock's)
 HAS_SUDO=0
-if [[ -z "$(sudo -n true 2>&1)" ]]; then
+if sudo --version &>/dev/null; then
     HAS_SUDO=1
 fi
 
