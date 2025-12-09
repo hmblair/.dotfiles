@@ -72,7 +72,11 @@ if ! command -v btop &> /dev/null; then
 
     $MAKE -j"$JOBS" PREFIX="$PREFIX" $GPU_FLAG || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
     $MAKE install PREFIX="$PREFIX" || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
-    [[ "$OSTYPE" == "linux-gnu"* ]] && $MAKE setcap
+
+    # setcap allows btop to read /proc without root (only in newer versions, requires sudo)
+    if [[ "$OSTYPE" == "linux-gnu"* ]] && grep -q '^setcap:' Makefile 2>/dev/null; then
+        $MAKE setcap 2>/dev/null || echo "Note: setcap failed (needs sudo), btop may have limited /proc access"
+    fi
 
     popd > /dev/null
     rm -rf /tmp/btop
