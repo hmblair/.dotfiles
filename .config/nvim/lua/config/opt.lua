@@ -36,10 +36,25 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
--- Yank to system clipboard
+-- Yank to system clipboard (with OSC 52 support for SSH)
 vim.schedule(function()
   vim.opt.clipboard = 'unnamed,unnamedplus'
 end)
+
+-- Use OSC 52 for clipboard when in SSH session (works with most terminals)
+if vim.env.SSH_CONNECTION then
+  vim.g.clipboard = {
+    name = 'OSC 52',
+    copy = {
+      ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+      ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+    },
+    paste = {
+      ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+      ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+    },
+  }
+end
 
 -- Open files to most recent line number
 vim.api.nvim_create_autocmd("BufReadPost", {
