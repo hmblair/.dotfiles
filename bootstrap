@@ -4,7 +4,12 @@
 
 set -e
 
-DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Resolve symlinks to get the actual script location
+SCRIPT_PATH="$0"
+if [[ -L "$SCRIPT_PATH" ]]; then
+  SCRIPT_PATH="$(readlink -f "$SCRIPT_PATH")"
+fi
+DOTFILES_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 LOCAL_PREFIX="$HOME/.local"
 LOG_DIR="$LOCAL_PREFIX/log/install"
 
