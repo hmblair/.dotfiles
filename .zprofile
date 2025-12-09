@@ -1,88 +1,83 @@
 #!/bin/zsh
+# Environment setup - runs once at login
 
-# Unified install prefixes
+# ─────────────────────────────────────────────────────────────────────────────
+# Core environment variables
+# ─────────────────────────────────────────────────────────────────────────────
+
 export LOCAL_PREFIX="$HOME/.local"
 export GLOBAL_PREFIX="/usr/local"
-
-# Ensure UTF-8 locale
-
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
 
-# Scratch directory
+# ─────────────────────────────────────────────────────────────────────────────
+# Shell helpers (must come before everything else)
+# ─────────────────────────────────────────────────────────────────────────────
+
+if [[ -f "$HOME/.local/lib/shell/lib.zsh" ]]; then
+  source "$HOME/.local/lib/shell/lib.zsh"
+else
+  # Fresh install - prompt user to run bootstrap
+  if [[ -x "$HOME/.dotfiles/bootstrap" ]]; then
+    echo "Run ~/.dotfiles/bootstrap to complete setup" >&2
+  fi
+  return 0
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Temporary directories
+# ─────────────────────────────────────────────────────────────────────────────
 
 export SCDIR="$HOME/scratch"
-if [[ -L "$SCDIR" && ! -e "$SCDIR" ]]; then
-    rm "$SCDIR"
-fi
-mkdir -p "/tmp/scratch"
-ln -sfn "/tmp/scratch" "$SCDIR"
-
-# Download directory
-
 export DLDIR="$HOME/downloads"
-if [[ -L "$DLDIR" && ! -e "$DLDIR" ]]; then
-    rm "$DLDIR"
-fi
-mkdir -p "/tmp/downloads"
-ln -sfn "/tmp/downloads" "$DLDIR"
+temp_symlink "$SCDIR" "scratch"
+temp_symlink "$DLDIR" "downloads"
 
-# Bootstrap user-defined paths
+# ─────────────────────────────────────────────────────────────────────────────
+# Path management (zu)
+# ─────────────────────────────────────────────────────────────────────────────
 
-if [[ ! -f "$HOME/.paths/boot" ]]; then
-    touch "$HOME/.paths/boot"
-    echo "$LOCAL_PREFIX/bin" >> "$HOME/.paths/boot"
-fi
+ensure_paths_dir
 
-# Init lmod if available (before installs so we can use modules)
+# Init lmod if available
+safe_source "${MODULESHOME}/init/zsh"
 
-if [[ -n "$MODULESHOME" && -f "$MODULESHOME/init/zsh" ]]; then
-    source "$MODULESHOME/init/zsh"
-fi
-
-# Install and init zu (before envs, as envs depends on zu)
-
+# Install zu
 LOG_DIR="$LOCAL_PREFIX/log/install"
-mkdir -p "$LOG_DIR"
-_zu_existed=0
-[[ -d "$LOCAL_PREFIX/share/zu" ]] && _zu_existed=1
-: > "$LOG_DIR/zu.log"
-if source "$HOME/.config/install/zu" > "$LOG_DIR/zu.log" 2>&1; then
-    if (( !_zu_existed )) && [[ -d "$LOCAL_PREFIX/share/zu" ]]; then
-        printf "  %-20s\033[0;32m%s\033[0m\n" "zu" "OK"
-    fi
-else
-    printf "  %-20s\033[0;31m%s\033[0m\n" "zu" "FAILED (see $LOG_DIR/zu.log)"
-fi
-unset _zu_existed
+run_install "zu" "$HOME/.config/install/zu" "$LOG_DIR"
 
+# Load paths (zu must be available)
 export PATH="$LOCAL_PREFIX/share/zu/bin:$PATH"
-eval "$(path read)"
+safe_eval "path read" --warn
 
-# Add homebrew paths if installed
-
-if command -v brew &> /dev/null && [ ! -f "$HOME/.paths/brew" ]; then
-    touch "$HOME/.paths/brew"
-    echo "$(brew --prefix)/bin" >> "$HOME/.paths/brew"
-    echo "$(brew --prefix)/sbin" >> "$HOME/.paths/brew"
+# Bootstrap homebrew paths if needed
+if has_cmd brew && [[ ! -f "$HOME/.paths/brew" ]]; then
+  local brew_prefix="$(brew --prefix)"
+  ensure_dir "$HOME/.paths"
+  printf "%s\n" "$brew_prefix/bin" "$brew_prefix/sbin" > "$HOME/.paths/brew"
 fi
 
-# Load user-defined environment variables
+# ─────────────────────────────────────────────────────────────────────────────
+# Environment variables
+# ─────────────────────────────────────────────────────────────────────────────
 
-command -v envs &>/dev/null && eval "$(envs read)"
+safe_eval "envs read"
 
-# Install and update core programs
+# ─────────────────────────────────────────────────────────────────────────────
+# Program installation
+# ─────────────────────────────────────────────────────────────────────────────
 
-source "$HOME/.config/install/install"
+safe_source "$HOME/.config/install/install" --warn
 
-
+# ─────────────────────────────────────────────────────────────────────────────
 # macOS-specific settings
+# ─────────────────────────────────────────────────────────────────────────────
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    # Turn 'quit unexpectedly' messages into notifications
-    defaults write com.apple.CrashReporter UseUNC 1
+  # Turn 'quit unexpectedly' messages into notifications
+  defaults write com.apple.CrashReporter UseUNC 1
 
-    # Custom screenshot location
-    export SSDIR="$HOME/screenshots"
-    mkdir -p "$SSDIR"
-    defaults write com.apple.screencapture location -string "$SSDIR"
+  # Custom screenshot location
+  export SSDIR="$HOME/screenshots"
+  ensure_dir "$SSDIR"
+  defaults write com.apple.screencapture location -string "$SSDIR"
 fi

@@ -1,0 +1,80 @@
+#!/usr/bin/env zsh
+# Bootstrap script for fresh machines
+# Usage: git clone <repo> ~/.dotfiles && ~/.dotfiles/bootstrap
+
+set -e
+
+DOTFILES_DIR="${0:A:h}"
+LOCAL_PREFIX="$HOME/.local"
+LOG_DIR="$LOCAL_PREFIX/log/install"
+
+# Colors
+_GREEN='\033[0;32m'
+_RED='\033[0;31m'
+_CYAN='\033[0;36m'
+_NC='\033[0m'
+
+info() { printf "${_CYAN}==> %s${_NC}\n" "$1"; }
+success() { printf "${_GREEN}==> %s${_NC}\n" "$1"; }
+error() { printf "${_RED}==> %s${_NC}\n" "$1" >&2; }
+
+mkdir -p "$LOG_DIR"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 0: Check prerequisites
+# ─────────────────────────────────────────────────────────────────────────────
+
+MISSING=()
+for cmd in git curl make perl tar; do
+  command -v "$cmd" &>/dev/null || MISSING+=("$cmd")
+done
+
+if (( ${#MISSING[@]} > 0 )); then
+  error "Missing required tools: ${MISSING[*]}"
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "Install Xcode Command Line Tools: xcode-select --install" >&2
+  elif command -v apt-get &>/dev/null; then
+    echo "Install with: sudo apt-get install ${MISSING[*]}" >&2
+  elif command -v dnf &>/dev/null; then
+    echo "Install with: sudo dnf install ${MISSING[*]}" >&2
+  fi
+  exit 1
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 1: Install stow (needed to symlink dotfiles)
+# ─────────────────────────────────────────────────────────────────────────────
+
+if ! command -v stow &>/dev/null && [[ ! -x "$LOCAL_PREFIX/bin/stow" ]]; then
+  info "Installing stow..."
+  export PREFIX="$LOCAL_PREFIX"
+  if source "$DOTFILES_DIR/.config/install/stow" > "$LOG_DIR/stow.log" 2>&1; then
+    export PATH="$LOCAL_PREFIX/bin:$PATH"
+    success "stow installed to $LOCAL_PREFIX/bin/stow"
+  else
+    error "Failed to install stow (see $LOG_DIR/stow.log)"
+    exit 1
+  fi
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 2: Stow dotfiles
+# ─────────────────────────────────────────────────────────────────────────────
+
+info "Linking dotfiles..."
+cd "$DOTFILES_DIR"
+if stow . -t ~ 2>"$LOG_DIR/stow-link.log"; then
+  success "Dotfiles linked"
+else
+  error "Failed to link dotfiles (see $LOG_DIR/stow-link.log)"
+  exit 1
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 3: Source shell config to trigger remaining installs
+# ─────────────────────────────────────────────────────────────────────────────
+
+info "Running shell setup..."
+source "$HOME/.zprofile"
+
+success "Bootstrap complete! Run 'source ~/.zshrc' or start a new shell."
