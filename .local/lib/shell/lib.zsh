@@ -8,16 +8,15 @@ warn() {
 
 # Source a file if it exists, optionally warn if missing
 # Usage: safe_source <file> [--warn]
+# Returns 0 if file missing (no-op) or sourced successfully
 safe_source() {
-  local file="$1" should_warn=0
-  [[ "$2" == "--warn" ]] && should_warn=1
+  local file="$1"
   if [[ -f "$file" ]]; then
     source "$file"
-    return 0
-  else
-    (( should_warn )) && warn "file not found: $file"
-    return 1
+  elif [[ "$2" == "--warn" ]]; then
+    warn "file not found: $file"
   fi
+  return 0
 }
 
 # Create a directory if it doesn't exist
