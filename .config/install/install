@@ -24,6 +24,11 @@ _NC='\033[0m'
 export GLOBAL_PREFIX LOCAL_PREFIX
 export JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 
+# Check if passwordless sudo is available
+_has_sudo() { sudo -n true 2>/dev/null; }
+HAS_SUDO=0
+_has_sudo && HAS_SUDO=1
+
 # Map script names to: command, global (1=sudo, 0=local)
 declare -A INSTALL_CMDS=(
     [btop]=btop
@@ -51,7 +56,7 @@ for script in "$INSTALL_DIR"/*; do
 
     cmd="${INSTALL_CMDS[$name]}"
     if [[ -n "$cmd" ]] && { (( FORCE )) || ! command -v "$cmd" &>/dev/null; }; then
-        if (( INSTALL_GLOBAL[$name] )) && sudo -n true 2>/dev/null; then
+        if (( INSTALL_GLOBAL[$name] && HAS_SUDO )); then
             GLOBAL_INSTALLS+=("$name")
         else
             LOCAL_INSTALLS+=("$name")
