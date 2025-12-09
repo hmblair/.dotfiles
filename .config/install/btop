@@ -20,7 +20,20 @@ if ! command -v btop &> /dev/null; then
 
     pushd /tmp > /dev/null
     rm -rf btop
-    git clone --depth 1 https://github.com/aristocratos/btop.git
+
+    # Use v1.3.2 for GCC < 13 (lacks full C++23 std::ranges::to support)
+    GCC_VER=$(${CXX:-c++} -dumpversion 2>/dev/null | cut -d. -f1)
+    if [[ -n "$GCC_VER" && "$GCC_VER" -lt 13 ]]; then
+        BTOP_TAG="v1.3.2"
+    else
+        BTOP_TAG=""  # latest
+    fi
+
+    if [[ -n "$BTOP_TAG" ]]; then
+        git clone --depth 1 --branch "$BTOP_TAG" https://github.com/aristocratos/btop.git
+    else
+        git clone --depth 1 https://github.com/aristocratos/btop.git
+    fi
     cd btop
 
     $MAKE -j"$JOBS" PREFIX="$PREFIX" || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
