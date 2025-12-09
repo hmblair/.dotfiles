@@ -18,5 +18,5 @@ else
         cd "$ZU_DIR" && \
         git pull --rebase --quiet 2>&1 && \
         zsh ./configure 2>&1
-    ) >> "${LOG_DIR:-$HOME/.local/log/install}/zu-update.log" 2>&1 &
+    ) >> "${LOG_DIR:-$HOME/.local/log/install}/zu-update.log" 2>&1 &!
 fi
