@@ -51,7 +51,7 @@ for script in "$INSTALL_DIR"/*; do
 
     cmd="${INSTALL_CMDS[$name]}"
     if [[ -n "$cmd" ]] && { (( FORCE )) || ! command -v "$cmd" &>/dev/null; }; then
-        if (( INSTALL_GLOBAL[$name] )) && command -v sudo &>/dev/null; then
+        if (( INSTALL_GLOBAL[$name] )) && sudo -n true 2>/dev/null; then
             GLOBAL_INSTALLS+=("$name")
         else
             LOCAL_INSTALLS+=("$name")
