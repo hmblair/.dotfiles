@@ -78,19 +78,18 @@ has_cmd() {
 
 # Safely eval command output, with optional warning on failure
 # Usage: safe_eval <cmd> [--warn]
+# Returns 0 if command missing (no-op) or eval'd successfully
 safe_eval() {
-  local cmd="$1" should_warn=0 output
-  [[ "$2" == "--warn" ]] && should_warn=1
-
+  local cmd="$1" output
   if has_cmd "${cmd%% *}"; then
     output="$(eval "$cmd" 2>/dev/null)"
     if [[ $? -eq 0 && -n "$output" ]]; then
       eval "$output"
-      return 0
+    elif [[ "$2" == "--warn" ]]; then
+      warn "failed to eval: $cmd"
     fi
   fi
-  (( should_warn )) && warn "failed to eval: $cmd"
-  return 1
+  return 0
 }
 
 # Source all files in a directory
