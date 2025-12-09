@@ -21,30 +21,13 @@ if ! command -v btop &> /dev/null; then
     pushd /tmp > /dev/null
     rm -rf btop
 
-    # Determine compiler: prefer Clang 16+ or GCC 14+ for full C++23 support
-    BTOP_TAG=""
-    if [[ -z "$CXX" ]]; then
-        # Check for Clang with C++23 support (Clang 16+)
-        if command -v clang++ &>/dev/null; then
-            CLANG_VER=$(clang++ --version 2>/dev/null | grep -oE 'version [0-9]+' | head -1 | grep -oE '[0-9]+')
-            if [[ -n "$CLANG_VER" && "$CLANG_VER" -ge 16 ]]; then
-                export CXX=clang++
-                export CC=clang
-                echo "Using Clang $CLANG_VER for C++23 support"
-            fi
-        fi
-    fi
-
-    # If still using GCC, check version
-    if [[ -z "$CXX" || "$CXX" == *g++* || "$CXX" == *c++* ]]; then
-        GCC_VER=$(${CXX:-g++} -dumpversion 2>/dev/null | cut -d. -f1)
-        if [[ -n "$GCC_VER" && "$GCC_VER" -lt 14 ]]; then
-            # Fall back to v1.3.2 if no suitable compiler
-            if [[ "$CXX" != "clang++" ]]; then
-                echo "GCC $GCC_VER lacks full C++23 support, using btop v1.3.2"
-                BTOP_TAG="v1.3.2"
-            fi
-        fi
+    # Use v1.3.2 for GCC < 14 (std::ranges::to requires GCC 14+)
+    GCC_VER=$(g++ -dumpversion 2>/dev/null | cut -d. -f1)
+    if [[ -z "$GCC_VER" || "$GCC_VER" -lt 14 ]]; then
+        echo "GCC ${GCC_VER:-not found} lacks full C++23 support, using btop v1.3.2"
+        BTOP_TAG="v1.3.2"
+    else
+        BTOP_TAG=""
     fi
 
     if [[ -n "$BTOP_TAG" ]]; then
