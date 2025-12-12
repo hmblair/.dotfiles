@@ -33,18 +33,17 @@ local function attach_lsp_keymaps(bufnr)
   end
 
   -- Diagnostic navigation
-  vim.keymap.set('n', 'je', function()
-    vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR, float = true })
-  end, opts('[J]ump next [E]rror'))
-  vim.keymap.set('n', 'Je', function()
-    vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR, float = true })
-  end, opts('[J]ump prev [E]rror'))
-  vim.keymap.set('n', 'jw', function()
-    vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.WARN, float = true })
-  end, opts('[J]ump next [W]arning'))
-  vim.keymap.set('n', 'Jw', function()
-    vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.WARN, float = true })
-  end, opts('[J]ump prev [W]arning'))
+  local jumps = {
+    { 'je', 1, 'ERROR', '[J]ump next [E]rror' },
+    { 'Je', -1, 'ERROR', '[J]ump prev [E]rror' },
+    { 'jw', 1, 'WARN', '[J]ump next [W]arning' },
+    { 'Jw', -1, 'WARN', '[J]ump prev [W]arning' },
+  }
+  for _, j in ipairs(jumps) do
+    vim.keymap.set('n', j[1], function()
+      vim.diagnostic.jump({ count = j[2], severity = vim.diagnostic.severity[j[3]], float = true })
+    end, opts(j[4]))
+  end
 
   -- LSP navigation
   vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts('[G]oto [D]efinition'))

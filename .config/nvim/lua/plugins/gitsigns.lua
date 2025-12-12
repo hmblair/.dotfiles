@@ -1,5 +1,12 @@
 return {
   'lewis6991/gitsigns.nvim',
+  cond = function()
+    if vim.fn.executable('git') == 0 then
+      vim.notify('gitsigns.nvim: git not found in PATH', vim.log.levels.WARN)
+      return false
+    end
+    return true
+  end,
   opts = {
     signs = {
       add = { text = '┃' },
