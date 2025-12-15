@@ -64,10 +64,12 @@ safe_source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
 safe_source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 export ZSH_AUTOSUGGEST_STRATEGY=(completion)
 
-# fzf-tab configuration
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'l --no-icons $realpath 2>/dev/null || ls -la $realpath'
-zstyle ':fzf-tab:complete:*:*' fzf-preview 'l --no-icons $realpath 2>/dev/null || ls -la $realpath'
-zstyle ':fzf-tab:*' fzf-flags --height=50%
+# LS_COLORS for file type coloring (matches l script: blue=dir, green=exec, cyan=link, red=broken)
+export LS_COLORS='di=34:ex=32:ln=36:or=31:mi=31:pi=33:so=35:bd=33:cd=33'
+
+# Completion colors (used by fzf-tab)
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
 
 # ─────────────────────────────────────────────────────────────────────────────
 # History
