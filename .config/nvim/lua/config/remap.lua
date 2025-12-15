@@ -16,3 +16,6 @@ vim.keymap.set({ 'n', 'v' }, 'D', '"_D', { desc = 'Delete to end (no yank)' })
 vim.keymap.set({ 'n', 'v' }, 'x', 'd', { desc = 'Cut (yank)' })
 vim.keymap.set('n', 'xx', 'dd', { desc = 'Cut line (yank)' })
 vim.keymap.set({ 'n', 'v' }, 'X', 'D', { desc = 'Cut to end (yank)' })
+
+vim.keymap.set('n', 'p', ']p', { desc = 'Paste with indent adjustment' })
+vim.keymap.set('n', 'P', ']P', { desc = 'Paste above with indent adjustment' })
