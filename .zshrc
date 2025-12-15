@@ -57,11 +57,17 @@ fi
 # conda
 has_cmd conda && eval "$(conda "shell.$(basename "${SHELL}")" hook)"
 
-# zsh plugins
+# zsh plugins (fzf-tab must be loaded before autosuggestions/syntax-highlighting)
 ZSH_PLUGIN_DIR="${LOCAL_PREFIX:-$HOME/.local}/zsh"
-safe_source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+[[ -f "$ZSH_PLUGIN_DIR/fzf-tab/fzf-tab.zsh" ]] && source "$ZSH_PLUGIN_DIR/fzf-tab/fzf-tab.zsh"
 safe_source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
+safe_source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 export ZSH_AUTOSUGGEST_STRATEGY=(completion)
+
+# fzf-tab configuration
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'l --no-icons $realpath 2>/dev/null || ls -la $realpath'
+zstyle ':fzf-tab:complete:*:*' fzf-preview 'l --no-icons $realpath 2>/dev/null || ls -la $realpath'
+zstyle ':fzf-tab:*' fzf-flags --height=50%
 
 # ─────────────────────────────────────────────────────────────────────────────
 # History
@@ -90,3 +96,23 @@ safe_source "$HOME/.local/lib/shell/aliases.zsh" --warn
 
 # User-specific aliases (machine-local, not in dotfiles)
 source_dir "$HOME/.aliases"
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/Users/hmblair/mambaforge/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/Users/hmblair/mambaforge/etc/profile.d/conda.sh" ]; then
+        . "/Users/hmblair/mambaforge/etc/profile.d/conda.sh"
+    else
+        export PATH="/Users/hmblair/mambaforge/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+
+if [ -f "/Users/hmblair/mambaforge/etc/profile.d/mamba.sh" ]; then
+    . "/Users/hmblair/mambaforge/etc/profile.d/mamba.sh"
+fi
+# <<< conda initialize <<<
+

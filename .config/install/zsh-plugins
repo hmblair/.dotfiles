@@ -22,3 +22,10 @@ if [[ ! -d "$ZSH_PLUGIN_DIR/zsh-autosuggestions" ]]; then
 else
     (cd "$ZSH_PLUGIN_DIR/zsh-autosuggestions" && git pull --rebase --quiet 2>/dev/null &)
 fi
+
+if [[ ! -d "$ZSH_PLUGIN_DIR/fzf-tab" ]]; then
+    git clone https://github.com/Aloxaf/fzf-tab.git \
+        "$ZSH_PLUGIN_DIR/fzf-tab" || return 1
+else
+    (cd "$ZSH_PLUGIN_DIR/fzf-tab" && git pull --rebase --quiet 2>/dev/null &)
+fi
