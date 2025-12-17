@@ -69,7 +69,7 @@ final_space = true
     style = 'plain'
     background = 'transparent'
     foreground = 'p:red'
-    template = '{{if gt .Code 0}} Exit {{ .Code }} {{ end }}'
+    template = '{{if gt .Code 0}} Exit {{ .Code }}{{ if eq .Code 130 }} (SIGINT){{ else if eq .Code 134 }} (SIGABRT){{ else if eq .Code 136 }} (SIGFPE){{ else if eq .Code 137 }} (SIGKILL){{ else if eq .Code 139 }} (SIGSEGV){{ else if eq .Code 143 }} (SIGTERM){{ end }} {{ end }}'
 
   [[blocks.segments]]
     type = 'git'
