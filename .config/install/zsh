@@ -13,15 +13,9 @@ for cmd in curl tar make; do
     fi
 done
 
-# Check for xz support (needed for .tar.xz)
-if ! command -v xz &>/dev/null && ! tar --help 2>&1 | grep -q xz; then
-    echo "Error: xz is required but not installed (for .tar.xz extraction)"
-    return 1 2>/dev/null || exit 1
-fi
-
 # Build from source
 ZSH_VERSION="5.9"
-ZSH_URL="https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.xz/download"
+ZSH_URL="https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.gz/download"
 BUILD_DIR="/tmp/zsh-build-$$"
 
 mkdir -p "$BUILD_DIR" "$PREFIX"
@@ -30,8 +24,8 @@ mkdir -p "$BUILD_DIR" "$PREFIX"
     cd "$BUILD_DIR"
 
     echo "Downloading zsh ${ZSH_VERSION}..."
-    curl -L "$ZSH_URL" -o zsh.tar.xz || exit 1
-    tar xf zsh.tar.xz
+    curl -L "$ZSH_URL" -o zsh.tar.gz || exit 1
+    tar xf zsh.tar.gz
     cd "zsh-${ZSH_VERSION}"
 
     echo "Configuring..."

@@ -4,12 +4,8 @@
 
 set -e
 
-# Resolve symlinks to get the actual script location
-SCRIPT_PATH="$0"
-if [[ -L "$SCRIPT_PATH" ]]; then
-  SCRIPT_PATH="$(readlink -f "$SCRIPT_PATH")"
-fi
-DOTFILES_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+# Resolve symlinks to get the actual script location (POSIX-compatible)
+DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 LOCAL_PREFIX="$HOME/.local"
 LOG_DIR="$LOCAL_PREFIX/log/install"
 
@@ -27,10 +23,73 @@ detail() { printf "    %s\n" "$1"; }
 mkdir -p "$LOG_DIR"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Step 0: Check prerequisites
+# Step 0: Initialize module system (for HPC environments)
+# ─────────────────────────────────────────────────────────────────────────────
+
+init_modules() {
+  # Already initialized
+  if type module &>/dev/null; then
+    return 0
+  fi
+
+  # Try common module init locations
+  local init_scripts=(
+    "${MODULESHOME}/init/bash"
+    "/usr/share/lmod/lmod/init/bash"
+    "/usr/share/modules/init/bash"
+    "/opt/modules/init/bash"
+    "/etc/profile.d/modules.sh"
+    "/etc/profile.d/lmod.sh"
+  )
+
+  for script in "${init_scripts[@]}"; do
+    if [[ -f "$script" ]]; then
+      source "$script" 2>/dev/null && return 0
+    fi
+  done
+  return 1
+}
+
+# Try to load a module for a missing command
+try_load_module() {
+  local cmd="$1"
+  shift
+  local modules=("$@")
+
+  # Skip if command exists or modules unavailable
+  command -v "$cmd" &>/dev/null && return 0
+  type module &>/dev/null || return 1
+
+  for mod in "${modules[@]}"; do
+    if module load "$mod" 2>/dev/null; then
+      if command -v "$cmd" &>/dev/null; then
+        detail "$cmd: loaded module '$mod'"
+        return 0
+      fi
+      module unload "$mod" 2>/dev/null
+    fi
+  done
+  return 1
+}
+
+if init_modules; then
+  detail "Module system available"
+fi
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 1: Check prerequisites (try modules for missing tools)
 # ─────────────────────────────────────────────────────────────────────────────
 
 info "Checking prerequisites..."
+
+# Try to load modules for common build tools
+try_load_module gcc    gcc gnu GCC gnu-compilers compiler/gnu
+try_load_module make   gcc gnu GCC gnu-compilers compiler/gnu
+try_load_module perl   perl Perl
+try_load_module curl   curl Curl
+try_load_module git    git Git
+try_load_module tar    tar
+
 MISSING=""
 for cmd in git curl make perl tar; do
   if command -v "$cmd" &>/dev/null; then
@@ -42,7 +101,9 @@ done
 
 if [[ -n "$MISSING" ]]; then
   error "Missing required tools:$MISSING"
-  if [[ "$OSTYPE" == "darwin"* ]]; then
+  if type module &>/dev/null; then
+    echo "Try: module avail | grep -iE '$(echo $MISSING | tr ' ' '|')'" >&2
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
     echo "Install Xcode Command Line Tools: xcode-select --install" >&2
   elif command -v apt-get &>/dev/null; then
     echo "Install with: sudo apt-get install$MISSING" >&2
@@ -54,7 +115,7 @@ fi
 success "All prerequisites found"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Step 1: Install stow (needed to symlink dotfiles)
+# Step 2: Install stow (needed to symlink dotfiles)
 # ─────────────────────────────────────────────────────────────────────────────
 
 if command -v stow &>/dev/null; then
@@ -76,7 +137,7 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Step 2: Stow dotfiles
+# Step 3: Stow dotfiles
 # ─────────────────────────────────────────────────────────────────────────────
 
 info "Linking dotfiles..."
@@ -91,7 +152,7 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Step 3: Run shell setup (installs zsh if needed, then remaining tools)
+# Step 4: Run shell setup (installs zsh if needed, then remaining tools)
 # ─────────────────────────────────────────────────────────────────────────────
 
 info "Running shell setup..."
