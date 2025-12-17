@@ -26,13 +26,20 @@ bindkey "^[[B" history-search-forward
 # Prompt (oh-my-posh)
 # ─────────────────────────────────────────────────────────────────────────────
 
+posh() {
+  case "$1" in
+    off)
+      precmd_functions=(${precmd_functions:#_omp*})
+      preexec_functions=(${preexec_functions:#_omp*})
+      PROMPT="❯ " RPROMPT=""
+      ;;
+    on)  eval "$(oh-my-posh init zsh --config "$HOME/.config/oh-my-posh/config.toml")" ;;
+    *)   echo "Usage: posh on|off" ;;
+  esac
+}
+
 if [[ "$TERM_PROGRAM" != "Apple_Terminal" ]] && has_cmd oh-my-posh; then
-  local omp_config="$HOME/.config/oh-my-posh/config.toml"
-  if [[ -f "$omp_config" ]]; then
-    eval "$(oh-my-posh init zsh --config "$omp_config")"
-  else
-    warn "oh-my-posh config not found: $omp_config"
-  fi
+  posh on
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
