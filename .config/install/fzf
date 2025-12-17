@@ -1,0 +1,38 @@
+#!/usr/bin/env zsh
+
+if [[ -x "$LOCAL_PREFIX/bin/fzf" ]] || command -v fzf &> /dev/null; then
+    return 0 2>/dev/null || exit 0
+fi
+
+# Check dependencies
+if ! command -v curl &>/dev/null; then
+    echo "Error: curl is required but not installed"
+    return 1 2>/dev/null || exit 1
+fi
+
+mkdir -p "$LOCAL_PREFIX/bin"
+
+# Determine platform and architecture
+case "$(uname -s)" in
+    Darwin) OS="darwin" ;;
+    Linux)  OS="linux" ;;
+    *)      echo "Unsupported OS"; return 1 ;;
+esac
+
+case "$(uname -m)" in
+    x86_64)  ARCH="amd64" ;;
+    arm64|aarch64) ARCH="arm64" ;;
+    *)       echo "Unsupported architecture"; return 1 ;;
+esac
+
+# Get latest version and download
+VERSION=$(curl -fsSL "https://api.github.com/repos/junegunn/fzf/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+[[ -z "$VERSION" ]] && { echo "Failed to get version"; return 1; }
+
+URL="https://github.com/junegunn/fzf/releases/download/v${VERSION}/fzf-${VERSION}-${OS}_${ARCH}.tar.gz"
+TMPDIR=$(mktemp -d)
+curl -fsSL "$URL" -o "$TMPDIR/fzf.tar.gz" || { rm -rf "$TMPDIR"; return 1; }
+tar -xzf "$TMPDIR/fzf.tar.gz" -C "$TMPDIR" || { rm -rf "$TMPDIR"; return 1; }
+mv "$TMPDIR/fzf" "$LOCAL_PREFIX/bin/fzf" || { rm -rf "$TMPDIR"; return 1; }
+chmod +x "$LOCAL_PREFIX/bin/fzf"
+rm -rf "$TMPDIR"
