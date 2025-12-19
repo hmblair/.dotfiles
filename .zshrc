@@ -77,6 +77,7 @@ export LS_COLORS='di=34:ex=32:ln=36:or=31:mi=31:pi=33:so=35:bd=33:cd=33'
 # Completion colors (used by fzf-tab)
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' fzf-flags --no-preview --height=~50%
 
 # ─────────────────────────────────────────────────────────────────────────────
 # History
