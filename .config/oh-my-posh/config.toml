@@ -140,17 +140,6 @@ final_space = true
       source = "cli"
 
   [[blocks.segments]]
-    type = 'git'
-    style = 'plain'
-    background = 'transparent'
-    foreground = 'p:grey'
-    template = '{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }}'
-
-    [blocks.segments.properties]
-      fetch_status = true
-      source = "cli"
-
-  [[blocks.segments]]
     type = 'python'
     style = 'plain'
     background = 'transparent'
