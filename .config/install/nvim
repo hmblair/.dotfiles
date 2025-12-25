@@ -1,32 +1,33 @@
 #!/usr/bin/env zsh
 
-if ! command -v nvim &> /dev/null; then
-    # Check dependencies
-    for cmd in git cmake make ninja; do
-        if ! command -v "$cmd" &>/dev/null; then
-            echo "Error: $cmd is required but not installed"
-            return 1
-        fi
-    done
-
-    pushd /tmp > /dev/null
-    rm -rf neovim
-    git clone --depth 1 https://github.com/neovim/neovim
-    cd neovim
-
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo \
-            CMAKE_INSTALL_PREFIX="$PREFIX" \
-            CMAKE_EXTRA_FLAGS="-DCMAKE_C_FLAGS='-gdwarf-4'" \
-            DEPS_CMAKE_FLAGS="-DTREESITTER_ARGS=-DCMAKE_C_FLAGS='-D_BSD_SOURCE -gdwarf-4'" \
-            || { popd > /dev/null; rm -rf /tmp/neovim; return 1; }
-    else
-        make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX" \
-            || { popd > /dev/null; rm -rf /tmp/neovim; return 1; }
-    fi
-
-    make install || { popd > /dev/null; rm -rf /tmp/neovim; return 1; }
-
-    popd > /dev/null
-    rm -rf /tmp/neovim
+if [[ -x "$LOCAL_PREFIX/bin/nvim" ]] || command -v nvim &>/dev/null; then
+    return 0 2>/dev/null || exit 0
 fi
+
+# Check dependencies
+for cmd in git cmake make ninja; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "Error: $cmd is required but not installed"
+        return 1 2>/dev/null || exit 1
+    fi
+done
+
+TMPDIR=$(mktemp -d)
+trap "rm -rf '$TMPDIR'" EXIT
+cd "$TMPDIR"
+
+git clone --depth 1 https://github.com/neovim/neovim
+cd neovim
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo \
+        CMAKE_INSTALL_PREFIX="$PREFIX" \
+        CMAKE_EXTRA_FLAGS="-DCMAKE_C_FLAGS='-gdwarf-4'" \
+        DEPS_CMAKE_FLAGS="-DTREESITTER_ARGS=-DCMAKE_C_FLAGS='-D_BSD_SOURCE -gdwarf-4'" \
+        || return 1
+else
+    make -j"$JOBS" CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX="$PREFIX" \
+        || return 1
+fi
+
+make install || return 1

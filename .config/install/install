@@ -30,10 +30,11 @@ for arg in "$@"; do
     [[ "$arg" == "--global" ]] && HAS_SUDO=1
 done
 
-# Map script names to: command, global (1=sudo, 0=local)
+# Map script names to: command(s) to check, global (1=sudo, 0=local)
+# Multiple commands separated by space - script runs if ANY are missing
 declare -A INSTALL_CMDS=(
     [btop]=btop
-    [fzf]=fzf
+    [fzf]="fzf fd"
     [ninja]=ninja
     [nvim]=nvim
     [oh-my-posh]=oh-my-posh
@@ -52,6 +53,14 @@ declare -A INSTALL_GLOBAL=(
     [zsh-plugins]=0
 )
 
+# Check if any command in a space-separated list is missing
+any_missing() {
+    for cmd in ${=1}; do
+        command -v "$cmd" &>/dev/null || return 0
+    done
+    return 1
+}
+
 # Find what needs installing, separate global vs local
 typeset -a GLOBAL_INSTALLS LOCAL_INSTALLS
 for script in "$INSTALL_DIR"/*; do
@@ -59,14 +68,14 @@ for script in "$INSTALL_DIR"/*; do
     [[ "$name" == "install" || "$name" == "zu" ]] && continue
     [[ -f "$script" && -x "$script" ]] || continue
 
-    cmd="${INSTALL_CMDS[$name]}"
-    if [[ -n "$cmd" ]] && { (( FORCE )) || ! command -v "$cmd" &>/dev/null; }; then
+    cmds="${INSTALL_CMDS[$name]}"
+    if [[ -n "$cmds" ]] && { (( FORCE )) || any_missing "$cmds"; }; then
         if (( INSTALL_GLOBAL[$name] && HAS_SUDO )); then
             GLOBAL_INSTALLS+=("$name")
         else
             LOCAL_INSTALLS+=("$name")
         fi
-    elif [[ -z "$cmd" ]]; then
+    elif [[ -z "$cmds" ]]; then
         source "$script" > "$LOG_DIR/$name.log" 2>&1
     fi
 done
@@ -120,12 +129,12 @@ if (( ${#LOCAL_INSTALLS[@]} > 0 )); then
     export USE_SUDO=0
 
     for name in "${LOCAL_INSTALLS[@]}"; do
-        cmd="${INSTALL_CMDS[$name]}"
+        cmds="${INSTALL_CMDS[$name]}"
         log_file="$LOG_DIR/$name.log"
 
         printf "  %-20s" "$name"
         if source "$INSTALL_DIR/$name" > "$log_file" 2>&1; then
-            printf "${_GREEN}%s${_NC}\n" "$PREFIX/bin/$cmd"
+            printf "${_GREEN}%s${_NC}\n" "OK"
         else
             printf "${_RED}%s${_NC}\n" "FAILED (see $log_file)"
         fi

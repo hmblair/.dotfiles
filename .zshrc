@@ -59,6 +59,42 @@ if has_cmd fzf; then
   source <(fzf --zsh)
   local fzf_config="$HOME/.config/fzf/config"
   [[ -f "$fzf_config" ]] && export FZF_DEFAULT_OPTS_FILE="$fzf_config"
+
+  # File lister with icons (matching l script: =dir, =file, =exec, =symlink)
+  _fzf_files() {
+    fd --type f --type d --type l --hidden --exclude .git 2>/dev/null | while IFS= read -r p; do
+      if [[ -L "$p" ]]; then
+        printf '\033[36m \033[0m %s\n' "$p"
+      elif [[ -d "$p" ]]; then
+        printf '\033[34m \033[0m %s\n' "$p"
+      elif [[ -x "$p" ]]; then
+        printf '\033[32m \033[0m %s\n' "$p"
+      else
+        printf ' %s\n' "$p"
+      fi
+    done
+  }
+
+  # Default: use fd for speed (colors but no icons)
+  has_cmd fd && export FZF_DEFAULT_COMMAND='fd --type f --type d --hidden --exclude .git --color=always'
+
+  # f: fuzzy find files with icons, output clean path
+  f() {
+    local sel
+    sel=$(_fzf_files | fzf --with-nth=2.. --ansi "$@") && printf '%s\n' "${sel#* }"
+  }
+
+  # fe: fuzzy find and edit file
+  fe() {
+    local file
+    file=$(f "$@") && ${EDITOR:-vim} "$file"
+  }
+
+  # fcd: fuzzy find and cd to directory
+  fcd() {
+    local dir
+    dir=$(fd --type d --hidden --follow --exclude .git --color=always | fzf --ansi "$@") && cd "$dir"
+  }
 fi
 
 # conda
@@ -77,7 +113,9 @@ export LS_COLORS='di=34:ex=32:ln=36:or=31:mi=31:pi=33:so=35:bd=33:cd=33'
 # Completion colors (used by fzf-tab)
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
-zstyle ':fzf-tab:*' fzf-flags --no-preview --height=~50%
+zstyle ':fzf-tab:*' fzf-flags --no-preview --height=~50% \
+  --bind='shift-up:toggle+up,shift-down:toggle+down' \
+  --bind='ctrl-a:select-all,ctrl-d:deselect-all'
 
 # ─────────────────────────────────────────────────────────────────────────────
 # History

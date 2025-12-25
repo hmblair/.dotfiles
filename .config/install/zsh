@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # Skip if zsh already installed
-if command -v zsh >/dev/null 2>&1; then
+if [[ -x "$LOCAL_PREFIX/bin/zsh" ]] || command -v zsh &>/dev/null; then
     return 0 2>/dev/null || exit 0
 fi
 
@@ -13,20 +13,22 @@ for cmd in curl tar make; do
     fi
 done
 
-# Build from source
-ZSH_VERSION="5.9"
-ZSH_URL="https://sourceforge.net/projects/zsh/files/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.gz/download"
-BUILD_DIR="/tmp/zsh-build-$$"
+# Get latest stable version from GitHub tags
+VERSION=$(curl -fsSL "https://api.github.com/repos/zsh-users/zsh/tags" | grep -oE '"name": "zsh-[0-9]+\.[0-9]+(\.[0-9]+)?"' | head -1 | sed -E 's/.*"zsh-([^"]+)".*/\1/')
+[[ -z "$VERSION" ]] && VERSION="5.9"
 
-mkdir -p "$BUILD_DIR" "$PREFIX"
+URL="https://sourceforge.net/projects/zsh/files/zsh/${VERSION}/zsh-${VERSION}.tar.gz/download"
+TMPDIR=$(mktemp -d)
+trap "rm -rf '$TMPDIR'" EXIT
+
+mkdir -p "$PREFIX"
 
 (
-    cd "$BUILD_DIR"
-
-    echo "Downloading zsh ${ZSH_VERSION}..."
-    curl -L "$ZSH_URL" -o zsh.tar.gz || exit 1
+    cd "$TMPDIR"
+    echo "Downloading zsh ${VERSION}..."
+    curl -fsSL "$URL" -o zsh.tar.gz || exit 1
     tar xf zsh.tar.gz
-    cd "zsh-${ZSH_VERSION}"
+    cd "zsh-${VERSION}"
 
     echo "Configuring..."
     ./configure --prefix="$PREFIX" || exit 1
@@ -36,9 +38,7 @@ mkdir -p "$BUILD_DIR" "$PREFIX"
 
     echo "Installing to $PREFIX..."
     make install || exit 1
-) || { rm -rf "$BUILD_DIR"; return 1; }
-
-rm -rf "$BUILD_DIR"
+)
 
 # Add zsh exec to .bashrc if not already present (only for local installs)
 if (( ! USE_SUDO )); then

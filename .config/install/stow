@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # Skip if stow already installed
-if [[ -x "$LOCAL_PREFIX/bin/stow" ]] || command -v stow >/dev/null 2>&1; then
+if [[ -x "$LOCAL_PREFIX/bin/stow" ]] || command -v stow &>/dev/null; then
     return 0 2>/dev/null || exit 0
 fi
 
@@ -13,26 +13,27 @@ for cmd in perl curl tar make; do
     fi
 done
 
-# Build from source
-STOW_VERSION="2.4.0"
-STOW_URL="https://ftp.gnu.org/gnu/stow/stow-${STOW_VERSION}.tar.gz"
-BUILD_DIR="/tmp/stow-build-$$"
+# Get latest version from GNU FTP directory listing
+VERSION=$(curl -fsSL "https://ftp.gnu.org/gnu/stow/" | grep -oE 'stow-[0-9]+\.[0-9]+(\.[0-9]+)?\.tar\.gz' | sort -V | tail -1 | sed -E 's/stow-(.*)\.tar\.gz/\1/')
+[[ -z "$VERSION" ]] && VERSION="2.4.0"
 
-mkdir -p "$BUILD_DIR" "$PREFIX"
+URL="https://ftp.gnu.org/gnu/stow/stow-${VERSION}.tar.gz"
+TMPDIR=$(mktemp -d)
+trap "rm -rf '$TMPDIR'" EXIT
+
+mkdir -p "$PREFIX"
 
 (
-    cd "$BUILD_DIR"
-
-    echo "Downloading stow ${STOW_VERSION}..."
-    curl -L "$STOW_URL" -o stow.tar.gz || exit 1
+    cd "$TMPDIR"
+    echo "Downloading stow ${VERSION}..."
+    curl -fsSL "$URL" -o stow.tar.gz || exit 1
     tar xf stow.tar.gz
-    cd "stow-${STOW_VERSION}"
+    cd "stow-${VERSION}"
 
     echo "Configuring..."
     ./configure --prefix="$PREFIX" || exit 1
 
     echo "Installing to $PREFIX..."
     make install || exit 1
-) || { rm -rf "$BUILD_DIR"; return 1; }
+)
 
-rm -rf "$BUILD_DIR"

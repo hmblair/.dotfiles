@@ -4,9 +4,28 @@
 --layout reverse
 --border rounded
 --ansi
---color info:10,prompt:15,spinner:10,pointer:13,marker:13,hl:10,hl+:10,fg+:15,bg+:0
+--multi
 --info inline-right
---preview 'l --no-icons {} 2>/dev/null || fzf-preview.sh {}'
 --no-scrollbar
 --prompt ./
 --pointer ❯
+--marker 󰄬
+
+# Colors matching l script: blue=dir, green=exec, cyan=symlink, red=error
+# fg/bg: default, hl: green (matches), pointer/marker: magenta
+--color fg:-1,bg:-1,hl:10,fg+:15,bg+:0,hl+:10
+--color info:8,prompt:4,pointer:13,marker:2,spinner:10
+
+# Preview with file info (size, type, permissions) then content
+--preview '[[ -d {} ]] && l -s {} || { file -b {} | head -1; echo; bat --style=numbers,changes --color=always --line-range :200 {} 2>/dev/null || l {} 2>/dev/null || head -100 {}; }'
+--preview-window right:50%:wrap
+
+# Keybindings
+--bind 'ctrl-/:toggle-preview'
+--bind 'ctrl-a:select-all'
+--bind 'ctrl-d:deselect-all'
+--bind 'ctrl-y:execute-silent(echo -n {+} | pbcopy)+abort'
+--bind 'alt-up:preview-page-up'
+--bind 'alt-down:preview-page-down'
+--bind 'shift-up:toggle+up'
+--bind 'shift-down:toggle+down'

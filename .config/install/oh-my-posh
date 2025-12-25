@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-if [[ -x "$LOCAL_PREFIX/bin/oh-my-posh" ]] || command -v oh-my-posh &> /dev/null; then
+if [[ -x "$LOCAL_PREFIX/bin/oh-my-posh" ]] || command -v oh-my-posh &>/dev/null; then
     return 0 2>/dev/null || exit 0
 fi
 
@@ -10,10 +10,11 @@ if ! command -v curl &>/dev/null; then
     return 1 2>/dev/null || exit 1
 fi
 
-mkdir -p "$LOCAL_PREFIX/bin"
+mkdir -p "$PREFIX/bin"
+
+TMPDIR=$(mktemp -d)
+trap "rm -rf '$TMPDIR'" EXIT
 
 # Download installer to temp file first (safer than piping to bash)
-INSTALLER="/tmp/oh-my-posh-install-$$.sh"
-curl -fsSL https://ohmyposh.dev/install.sh -o "$INSTALLER" || { rm -f "$INSTALLER"; return 1; }
-bash "$INSTALLER" -d "$LOCAL_PREFIX/bin" || { rm -f "$INSTALLER"; return 1; }
-rm -f "$INSTALLER"
+curl -fsSL https://ohmyposh.dev/install.sh -o "$TMPDIR/install.sh" || return 1
+bash "$TMPDIR/install.sh" -d "$PREFIX/bin" || return 1

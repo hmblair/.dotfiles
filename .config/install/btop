@@ -1,84 +1,81 @@
 #!/usr/bin/env zsh
 
-if ! command -v btop &> /dev/null; then
-    # Check dependencies
-    if ! command -v git &>/dev/null; then
-        echo "Error: git is required but not installed"
-        return 1
-    fi
+if [[ -x "$LOCAL_PREFIX/bin/btop" ]] || command -v btop &>/dev/null; then
+    return 0 2>/dev/null || exit 0
+fi
 
-    # Set make command (brew dependencies installed by main install script)
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        if ! command -v gmake &>/dev/null; then
-            echo "Error: gmake not found. Install with: brew install make"
-            return 1
+# Check dependencies
+if ! command -v git &>/dev/null; then
+    echo "Error: git is required but not installed"
+    return 1 2>/dev/null || exit 1
+fi
+
+# Set make command (brew dependencies installed by main install script)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if ! command -v gmake &>/dev/null; then
+        echo "Error: gmake not found. Install with: brew install make"
+        return 1 2>/dev/null || exit 1
+    fi
+    MAKE="gmake"
+else
+    MAKE="make"
+fi
+
+TMPDIR=$(mktemp -d)
+trap "rm -rf '$TMPDIR'" EXIT
+cd "$TMPDIR"
+
+# Use v1.3.2 for GCC < 14 (std::ranges::to requires GCC 14+)
+GCC_VER=$(g++ -dumpversion 2>/dev/null | cut -d. -f1)
+if [[ -z "$GCC_VER" || "$GCC_VER" -lt 14 ]]; then
+    echo "GCC ${GCC_VER:-not found} lacks full C++23 support, using btop v1.3.2"
+    BTOP_TAG="v1.3.2"
+else
+    BTOP_TAG=""
+fi
+
+if [[ -n "$BTOP_TAG" ]]; then
+    git clone --depth 1 --branch "$BTOP_TAG" https://github.com/aristocratos/btop.git
+else
+    git clone --depth 1 https://github.com/aristocratos/btop.git
+fi
+cd btop
+
+# GPU support on Linux: enable if NVIDIA drivers and libdl are available
+GPU_FLAG=""
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    GPU_SUPPORT=false
+
+    # Check for NVIDIA: need libnvidia-ml.so and libdl
+    if command -v nvidia-smi &>/dev/null; then
+        NVML_LIB=$(ldconfig -p 2>/dev/null | grep -m1 'libnvidia-ml.so' | awk '{print $NF}')
+        DL_LIB=$(ldconfig -p 2>/dev/null | grep -m1 'libdl.so' | awk '{print $NF}')
+
+        # On newer glibc (2.34+), libdl is merged into libc
+        if [[ -z "$DL_LIB" ]]; then
+            echo 'int main(){}' > "$TMPDIR/dl_test.c"
+            if ${CC:-cc} -o "$TMPDIR/dl_test" "$TMPDIR/dl_test.c" -ldl 2>/dev/null; then
+                DL_LIB="builtin"
+            fi
         fi
-        MAKE="gmake"
-    else
-        MAKE="make"
-    fi
 
-    pushd /tmp > /dev/null
-    rm -rf btop
-
-    # Use v1.3.2 for GCC < 14 (std::ranges::to requires GCC 14+)
-    GCC_VER=$(g++ -dumpversion 2>/dev/null | cut -d. -f1)
-    if [[ -z "$GCC_VER" || "$GCC_VER" -lt 14 ]]; then
-        echo "GCC ${GCC_VER:-not found} lacks full C++23 support, using btop v1.3.2"
-        BTOP_TAG="v1.3.2"
-    else
-        BTOP_TAG=""
-    fi
-
-    if [[ -n "$BTOP_TAG" ]]; then
-        git clone --depth 1 --branch "$BTOP_TAG" https://github.com/aristocratos/btop.git
-    else
-        git clone --depth 1 https://github.com/aristocratos/btop.git
-    fi
-    cd btop
-
-    # GPU support on Linux: enable if NVIDIA drivers and libdl are available
-    GPU_FLAG=""
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        GPU_SUPPORT=false
-
-        # Check for NVIDIA: need libnvidia-ml.so and libdl
-        if command -v nvidia-smi &>/dev/null; then
-            # nvidia-smi exists, check for required libraries
-            NVML_LIB=$(ldconfig -p 2>/dev/null | grep -m1 'libnvidia-ml.so' | awk '{print $NF}')
-            DL_LIB=$(ldconfig -p 2>/dev/null | grep -m1 'libdl.so' | awk '{print $NF}')
-
-            # On newer glibc (2.34+), libdl is merged into libc
-            if [[ -z "$DL_LIB" ]]; then
-                # Check if we can link against -ldl anyway (glibc provides it)
-                echo 'int main(){}' > /tmp/dl_test.c
-                if ${CC:-cc} -o /tmp/dl_test /tmp/dl_test.c -ldl 2>/dev/null; then
-                    DL_LIB="builtin"
-                fi
-                rm -f /tmp/dl_test.c /tmp/dl_test
-            fi
-
-            if [[ -n "$NVML_LIB" && -n "$DL_LIB" ]]; then
-                echo "NVIDIA GPU support: enabled (found libnvidia-ml and libdl)"
-                GPU_SUPPORT=true
-            else
-                echo "NVIDIA GPU support: disabled (missing libs: ${NVML_LIB:-libnvidia-ml} ${DL_LIB:-libdl})"
-            fi
+        if [[ -n "$NVML_LIB" && -n "$DL_LIB" ]]; then
+            echo "NVIDIA GPU support: enabled (found libnvidia-ml and libdl)"
+            GPU_SUPPORT=true
         else
-            echo "GPU support: disabled (nvidia-smi not found)"
+            echo "NVIDIA GPU support: disabled (missing libs: ${NVML_LIB:-libnvidia-ml} ${DL_LIB:-libdl})"
         fi
-
-        [[ "$GPU_SUPPORT" == "false" ]] && GPU_FLAG="GPU_SUPPORT=false"
+    else
+        echo "GPU support: disabled (nvidia-smi not found)"
     fi
 
-    $MAKE -j"$JOBS" PREFIX="$PREFIX" $GPU_FLAG || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
-    $MAKE install PREFIX="$PREFIX" || { popd > /dev/null; rm -rf /tmp/btop; return 1; }
+    [[ "$GPU_SUPPORT" == "false" ]] && GPU_FLAG="GPU_SUPPORT=false"
+fi
 
-    # setcap allows btop to read /proc without root (only in newer versions, requires sudo)
-    if [[ "$OSTYPE" == "linux-gnu"* ]] && grep -q '^setcap:' Makefile 2>/dev/null; then
-        $MAKE setcap 2>/dev/null || echo "Note: setcap failed (needs sudo), btop may have limited /proc access"
-    fi
+$MAKE -j"$JOBS" PREFIX="$PREFIX" $GPU_FLAG || return 1
+$MAKE install PREFIX="$PREFIX" || return 1
 
-    popd > /dev/null
-    rm -rf /tmp/btop
+# setcap allows btop to read /proc without root (only in newer versions, requires sudo)
+if [[ "$OSTYPE" == "linux-gnu"* ]] && grep -q '^setcap:' Makefile 2>/dev/null; then
+    $MAKE setcap 2>/dev/null || echo "Note: setcap failed (needs sudo), btop may have limited /proc access"
 fi
