@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Bootstrap script for fresh machines
-# Usage: git clone <repo> ~/.dotfiles && ~/.dotfiles/bootstrap
+# Usage: git clone <repo> ~/.dotfiles && ~/.dotfiles/.bootstrap
 
 set -e
 

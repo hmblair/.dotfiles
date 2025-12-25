@@ -26,8 +26,8 @@ if [[ -f "$HOME/.local/lib/shell/lib.zsh" ]]; then
   source "$HOME/.local/lib/shell/lib.zsh"
 else
   # Fresh install - prompt user to run bootstrap
-  if [[ -x "$HOME/.dotfiles/bootstrap" ]]; then
-    echo "Run ~/.dotfiles/bootstrap to complete setup" >&2
+  if [[ -x "$HOME/.dotfiles/.bootstrap" ]]; then
+    echo "Run ~/.dotfiles/.bootstrap to complete setup" >&2
   fi
   return 0
 fi
