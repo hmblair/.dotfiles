@@ -13,8 +13,6 @@
 !.config/neofetch/
 !.config/nvim/
 !.config/oh-my-posh/
-!.config/shell/
 
 # Ignore specific files within tracked folders
 .config/nvim/lazy-lock.json
-.config/shell/env

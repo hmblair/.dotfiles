@@ -1,5 +1,13 @@
 #!/bin/zsh
 # Environment setup - runs once at login
+#
+# Local customization (not tracked in git):
+#   ~/.paths/      Device-specific PATH entries (one path per line)
+#   ~/.aliases/    Device-specific aliases (sourced by .zshrc)
+#   ~/.envs/       Device-specific env vars (managed by `envs` command)
+#
+# Use `envs add VAR value` to add environment variables
+# Use `path add /path/to/bin` to add paths
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Core environment variables
