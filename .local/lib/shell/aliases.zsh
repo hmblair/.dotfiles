@@ -3,7 +3,7 @@
 
 # Safe defaults
 alias mv="mv -i"
-alias rsync="rsync -azh --progress"
+alias rsync="rsync -azh --progress --exclude=.git"
 
 # Editor shortcuts
 alias py="python3"
