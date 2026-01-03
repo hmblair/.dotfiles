@@ -179,3 +179,18 @@ else
 fi
 
 success "Bootstrap complete! Run 'exec zsh -l' to start your new shell."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Reminder for remote servers
+# ─────────────────────────────────────────────────────────────────────────────
+
+cat << 'EOF'
+
+NOTE: If your default shell is bash but you want zsh for interactive sessions,
+add this to the TOP of your ~/.bashrc to allow non-interactive commands (like
+rpy, rsync, scp) to work without loading zsh:
+
+    [[ $- != *i* ]] && return
+
+This ensures 'exec zsh' only runs for interactive logins, not remote commands.
+EOF
