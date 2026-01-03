@@ -1,6 +1,6 @@
 return {
   'GCBallesteros/jupytext.nvim',
-  lazy = false,
+  event = 'BufReadCmd *.ipynb',
   cond = function()
     if vim.fn.executable('jupytext') == 0 then
       vim.notify('jupytext.nvim: Missing dependency\n  pip3 install jupytext', vim.log.levels.WARN)

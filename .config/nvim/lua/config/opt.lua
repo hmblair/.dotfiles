@@ -68,3 +68,12 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 
 -- No shortmess
 vim.opt.shortmess:append("I")
+
+-- Auto-reload files changed outside of Neovim
+vim.opt.autoread = true
+local timer = vim.uv.new_timer()
+timer:start(0, 1000, vim.schedule_wrap(function()
+  if vim.fn.mode() ~= 'c' then
+    vim.cmd('checktime')
+  end
+end))
