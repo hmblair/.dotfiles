@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+
+if [[ -x "$LOCAL_PREFIX/bin/l" ]] || command -v l &>/dev/null; then
+    return 0 2>/dev/null || exit 0
+fi
+
+# Check dependencies
+if ! command -v git &>/dev/null; then
+    echo "Error: git is required but not installed"
+    return 1 2>/dev/null || exit 1
+fi
+
+L_DIR="$PREFIX/share/l"
+
+git clone https://github.com/hmblair/l.git "$L_DIR" || return 1
+make -C "$L_DIR" || return 1
+make -C "$L_DIR" install PREFIX="$PREFIX" || return 1
