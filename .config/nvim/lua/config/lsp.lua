@@ -88,4 +88,4 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 -- Enable LSP servers
-vim.lsp.enable({ 'pyright', 'clangd', 'bashls', 'luals' })
+vim.lsp.enable({ 'pyright', 'clangd', 'bashls', 'luals', 'texlab' })
