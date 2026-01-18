@@ -77,3 +77,17 @@ timer:start(0, 1000, vim.schedule_wrap(function()
     vim.cmd('checktime')
   end
 end))
+
+-- Load skeleton files for new buffers
+vim.api.nvim_create_autocmd('BufNewFile', {
+  pattern = '*.tex',
+  callback = function()
+    local skel = vim.fn.stdpath('config') .. '/skeletons/tex.skel'
+    if vim.fn.filereadable(skel) == 1 then
+      vim.cmd('0read ' .. skel)
+      vim.cmd('normal! Gdd')
+      vim.fn.search('\\\\title{')
+      vim.cmd('normal! f{l')
+    end
+  end,
+})
