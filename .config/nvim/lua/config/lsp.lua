@@ -6,7 +6,7 @@ vim.diagnostic.config({
   signs = {
     text = {
       [vim.diagnostic.severity.ERROR] = '✘',
-      [vim.diagnostic.severity.WARN] = '',
+      [vim.diagnostic.severity.WARN] = '',
       [vim.diagnostic.severity.HINT] = '󰌶',
       [vim.diagnostic.severity.INFO] = '●',
     },
@@ -24,7 +24,63 @@ vim.diagnostic.config({
 })
 
 -- Global diagnostic keymap (works without LSP attached)
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror' })
+local function diagnostic_float_with_action()
+  local orig_win = vim.api.nvim_get_current_win()
+  local orig_buf = vim.api.nvim_win_get_buf(orig_win)
+  local line = vim.api.nvim_win_get_cursor(orig_win)[1] - 1
+  local diagnostics = vim.diagnostic.get(orig_buf, { lnum = line })
+
+  if #diagnostics == 0 then return end
+
+  -- Build float content with numbered diagnostics
+  local lines = {}
+  local diag_map = {} -- maps float line number to diagnostic index
+  for i, diag in ipairs(diagnostics) do
+    local msg = diag.message:gsub('\n', ' ')
+    table.insert(lines, string.format('%d. %s', i, msg))
+    diag_map[#lines] = i
+  end
+
+  -- Create float buffer
+  local float_buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(float_buf, 0, -1, false, lines)
+  vim.bo[float_buf].modifiable = false
+
+  -- Calculate float size
+  local width = math.min(60, math.max(unpack(vim.tbl_map(function(l) return #l end, lines))))
+  local height = #lines
+
+  -- Open float window
+  local winid = vim.api.nvim_open_win(float_buf, true, {
+    relative = 'cursor',
+    row = 1,
+    col = 0,
+    width = width,
+    height = height,
+    style = 'minimal',
+    border = 'rounded',
+  })
+
+  -- Keymaps
+  vim.keymap.set('n', '<CR>', function()
+    local cursor_line = vim.api.nvim_win_get_cursor(winid)[1]
+    local diag_idx = diag_map[cursor_line] or 1
+    local diag = diagnostics[diag_idx]
+    vim.api.nvim_win_close(winid, true)
+    vim.api.nvim_set_current_win(orig_win)
+    vim.api.nvim_win_set_cursor(orig_win, { diag.lnum + 1, diag.col })
+    vim.lsp.buf.code_action()
+  end, { buffer = float_buf, desc = 'Code action' })
+
+  vim.keymap.set('n', 'q', function()
+    vim.api.nvim_win_close(winid, true)
+  end, { buffer = float_buf, desc = 'Close' })
+
+  vim.keymap.set('n', '<Esc>', function()
+    vim.api.nvim_win_close(winid, true)
+  end, { buffer = float_buf, desc = 'Close' })
+end
+vim.keymap.set('n', '<leader>e', diagnostic_float_with_action, { desc = 'Show diagnostic [E]rror' })
 
 -- LSP buffer-local keymaps
 local function attach_lsp_keymaps(bufnr)
@@ -55,6 +111,7 @@ local function attach_lsp_keymaps(bufnr)
   -- LSP actions
   vim.keymap.set('n', 'hd', vim.lsp.buf.hover, opts('[H]over [D]ocumentation'))
   vim.keymap.set('n', 're', vim.lsp.buf.rename, opts('[R]ename symbol'))
+  vim.keymap.set('n', 'ca', vim.lsp.buf.code_action, opts('[C]ode [A]ction'))
 
   -- Dismiss autocomplete on enter
   vim.keymap.set('i', '<CR>', function()
@@ -88,4 +145,4 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 -- Enable LSP servers
-vim.lsp.enable({ 'pyright', 'clangd', 'bashls', 'luals', 'texlab' })
+vim.lsp.enable({ 'pyright', 'clangd', 'bashls', 'luals', 'texlab', 'harper_ls' })
