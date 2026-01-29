@@ -6,6 +6,7 @@ return {
   single_file_support = true,
   settings = {
     ['harper-ls'] = {
+      dialect = 'American',
       diagnosticSeverity = 'warning',
       linters = {
         long_sentences = false,

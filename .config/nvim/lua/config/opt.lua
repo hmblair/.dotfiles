@@ -98,7 +98,7 @@ vim.keymap.set('n', '<leader>sl', function()
   vim.opt_local.spelllang = vim.g.spell_lang
   -- Update harper-ls
   for _, client in ipairs(vim.lsp.get_clients({ name = "harper_ls" })) do
-    client.config.settings["harper-ls"].language = vim.g.spell_lang == "en_us" and "en-US" or "en-GB"
+    client.config.settings["harper-ls"].dialect = vim.g.spell_lang == "en_us" and "American" or "British"
     client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
   end
   print("Spell language: " .. vim.g.spell_lang)
