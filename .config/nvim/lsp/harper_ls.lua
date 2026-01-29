@@ -8,7 +8,8 @@ return {
     ['harper-ls'] = {
       diagnosticSeverity = 'warning',
       linters = {
-        LongSentences = false,
+        long_sentences = false,
+        sentence_capitalization = true,
       },
     },
   },

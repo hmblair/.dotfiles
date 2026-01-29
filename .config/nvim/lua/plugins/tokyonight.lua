@@ -6,6 +6,7 @@ return {
     require('tokyonight').setup({
       on_highlights = function(hl, c)
         hl.SpellBad = { undercurl = true, sp = c.red }
+        hl.SpellCap = {}
         hl.SpellRare = {}
       end,
     })
