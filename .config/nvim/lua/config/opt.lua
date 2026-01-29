@@ -78,14 +78,31 @@ timer:start(0, 1000, vim.schedule_wrap(function()
   end
 end))
 
--- Spell checking for prose filetypes
+-- Spell checking for tex files only (harper-ls handles other prose filetypes)
+vim.g.spell_lang = "en_us"
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "markdown", "tex", "text", "gitcommit" },
+  pattern = { "tex", "plaintex" },
   callback = function()
     vim.opt_local.spell = true
-    vim.opt_local.spelllang = "en_us"
+    vim.opt_local.spelllang = vim.g.spell_lang
   end,
 })
+
+-- Toggle between US and GB English
+vim.keymap.set('n', '<leader>sl', function()
+  if vim.g.spell_lang == "en_us" then
+    vim.g.spell_lang = "en_gb"
+  else
+    vim.g.spell_lang = "en_us"
+  end
+  vim.opt_local.spelllang = vim.g.spell_lang
+  -- Update harper-ls
+  for _, client in ipairs(vim.lsp.get_clients({ name = "harper_ls" })) do
+    client.config.settings["harper-ls"].language = vim.g.spell_lang == "en_us" and "en-US" or "en-GB"
+    client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
+  end
+  print("Spell language: " .. vim.g.spell_lang)
+end, { desc = 'Toggle [S]pell [L]anguage (US/GB)' })
 
 -- Load skeleton files for new buffers
 vim.api.nvim_create_autocmd('BufNewFile', {
