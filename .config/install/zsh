@@ -13,6 +13,32 @@ for cmd in curl tar make; do
     fi
 done
 
+# Check for ncurses development headers
+check_ncurses() {
+    # Try pkg-config first
+    pkg-config --exists ncurses 2>/dev/null && return 0
+    pkg-config --exists ncursesw 2>/dev/null && return 0
+    # Check common header locations
+    for dir in /usr/include /usr/local/include /opt/local/include; do
+        [[ -f "$dir/ncurses.h" || -f "$dir/curses.h" || -f "$dir/ncurses/ncurses.h" ]] && return 0
+    done
+    return 1
+}
+
+if ! check_ncurses; then
+    echo "Error: ncurses development headers not found"
+    if command -v apt-get &>/dev/null; then
+        echo "Install with: sudo apt-get install libncurses-dev"
+    elif command -v dnf &>/dev/null; then
+        echo "Install with: sudo dnf install ncurses-devel"
+    elif command -v yum &>/dev/null; then
+        echo "Install with: sudo yum install ncurses-devel"
+    elif command -v brew &>/dev/null; then
+        echo "Install with: brew install ncurses"
+    fi
+    return 1 2>/dev/null || exit 1
+fi
+
 # Get latest stable version from GitHub tags
 VERSION=$(curl -fsSL "https://api.github.com/repos/zsh-users/zsh/tags" | grep -oE '"name": "zsh-[0-9]+\.[0-9]+(\.[0-9]+)?"' | head -1 | sed -E 's/.*"zsh-([^"]+)".*/\1/')
 [[ -z "$VERSION" ]] && VERSION="5.9"
