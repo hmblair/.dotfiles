@@ -171,7 +171,7 @@ else
     success "zsh installed to $LOCAL_PREFIX/bin/zsh"
     export PATH="$LOCAL_PREFIX/bin:$PATH"
     detail "Sourcing $HOME/.zprofile"
-    zsh -c "source '$HOME/.zprofile'"
+    "$LOCAL_PREFIX/bin/zsh" -c "source '$HOME/.zprofile'"
   else
     error "Failed to install zsh (see $LOG_DIR/zsh.log)"
     exit 1
