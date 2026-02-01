@@ -11,11 +11,11 @@ return {
     opts = {
       ensure_installed = {
         'bash-language-server',
-        'clangd',
         'harper-ls',
         'lua-language-server',
         'pyright',
         'texlab',
+        -- clangd: install via Mason on macOS, or 'apt install clangd' on Linux
       },
     },
   },
