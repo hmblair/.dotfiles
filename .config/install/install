@@ -96,6 +96,10 @@ if (( ${#GLOBAL_INSTALLS[@]} > 0 )); then
         done
     fi
 
+    # Find compilers (sudo may not have same PATH)
+    : "${CC:=$(command -v gcc 2>/dev/null || command -v cc 2>/dev/null)}"
+    : "${CXX:=$(command -v g++ 2>/dev/null || command -v c++ 2>/dev/null)}"
+
     # Build script to run as root (pass only necessary env vars for security)
     sudo zsh -c "
         export PREFIX='$GLOBAL_PREFIX'
@@ -104,8 +108,8 @@ if (( ${#GLOBAL_INSTALLS[@]} > 0 )); then
         export USE_SUDO=1
         export JOBS=$JOBS
         export PATH='$PATH'
-        export CC='${CC:-}'
-        export CXX='${CXX:-}'
+        export CC='$CC'
+        export CXX='$CXX'
         export CFLAGS='${CFLAGS:-}'
         export CXXFLAGS='${CXXFLAGS:-}'
         export CPPFLAGS='${CPPFLAGS:-}'
