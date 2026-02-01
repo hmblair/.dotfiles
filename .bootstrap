@@ -260,22 +260,43 @@ if (( ! NEED_ZSH )); then
   zsh -c "source '$HOME/.zprofile' $INSTALL_ARGS"
 else
   # Install zsh first, then run setup
-  info "Installing zsh (not found in PATH)..."
+  info "Installing zsh..."
   detail "Log: $LOG_DIR/zsh.log"
-  export PREFIX="$ZSH_PREFIX"
-  export LOCAL_PREFIX
-  export GLOBAL_PREFIX
-  export USE_SUDO=$GLOBAL_INSTALL
-  export JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
-  if bash "$DOTFILES_DIR/.config/install/zsh" > "$LOG_DIR/zsh.log" 2>&1; then
-    success "zsh installed to $ZSH_PREFIX/bin/zsh"
-    export PATH="$ZSH_PREFIX/bin:$LOCAL_PREFIX/bin:$PATH"
-    detail "Sourcing $HOME/.zprofile"
-    "$ZSH_PREFIX/bin/zsh" -c "source '$HOME/.zprofile' $INSTALL_ARGS"
+  JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
+
+  if (( GLOBAL_INSTALL )); then
+    # Global install requires sudo
+    if sudo bash -c "
+      export PREFIX='$GLOBAL_PREFIX'
+      export LOCAL_PREFIX='$LOCAL_PREFIX'
+      export GLOBAL_PREFIX='$GLOBAL_PREFIX'
+      export USE_SUDO=1
+      export JOBS=$JOBS
+      bash '$DOTFILES_DIR/.config/install/zsh'
+    " > "$LOG_DIR/zsh.log" 2>&1; then
+      success "zsh installed to $ZSH_PREFIX/bin/zsh"
+    else
+      error "Failed to install zsh (see $LOG_DIR/zsh.log)"
+      exit 1
+    fi
   else
-    error "Failed to install zsh (see $LOG_DIR/zsh.log)"
-    exit 1
+    # Local install
+    export PREFIX="$LOCAL_PREFIX"
+    export LOCAL_PREFIX
+    export GLOBAL_PREFIX
+    export USE_SUDO=0
+    export JOBS
+    if bash "$DOTFILES_DIR/.config/install/zsh" > "$LOG_DIR/zsh.log" 2>&1; then
+      success "zsh installed to $ZSH_PREFIX/bin/zsh"
+    else
+      error "Failed to install zsh (see $LOG_DIR/zsh.log)"
+      exit 1
+    fi
   fi
+
+  export PATH="$ZSH_PREFIX/bin:$LOCAL_PREFIX/bin:$PATH"
+  detail "Sourcing $HOME/.zprofile"
+  "$ZSH_PREFIX/bin/zsh" -c "source '$HOME/.zprofile' $INSTALL_ARGS"
 fi
 
 success "Bootstrap complete! Run 'exec zsh -l' to start your new shell."
