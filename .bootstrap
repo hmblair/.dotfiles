@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 # Bootstrap script for fresh machines
-# Usage: git clone <repo> ~/.dotfiles && ~/.dotfiles/.bootstrap [--global]
+# Usage: git clone <repo> ~/.dotfiles && ~/.dotfiles/.bootstrap [--global] [--force] [--uninstall]
 
 set -e
 
 # Parse arguments
 GLOBAL_INSTALL=0
+FORCE_INSTALL=0
+UNINSTALL=0
 for arg in "$@"; do
   case "$arg" in
     --global) GLOBAL_INSTALL=1 ;;
+    --force|-f) FORCE_INSTALL=1 ;;
+    --uninstall) UNINSTALL=1 ;;
   esac
 done
 
@@ -28,6 +32,72 @@ info() { printf "${_CYAN}==> %s${_NC}\n" "$1"; }
 success() { printf "${_GREEN}==> %s${_NC}\n" "$1"; }
 error() { printf "${_RED}==> %s${_NC}\n" "$1" >&2; }
 detail() { printf "    %s\n" "$1"; }
+
+# Programs installed by bootstrap
+INSTALLED_BINS=(zsh ninja nvim fzf fd btop oh-my-posh stow l)
+INSTALLED_DIRS=(share/nvim share/zsh share/zu lib/zsh)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Uninstall mode
+# ─────────────────────────────────────────────────────────────────────────────
+
+if (( UNINSTALL )); then
+  info "Uninstalling programs..."
+
+  # Remove from local prefix
+  for bin in "${INSTALLED_BINS[@]}"; do
+    if [[ -e "$LOCAL_PREFIX/bin/$bin" ]]; then
+      rm -f "$LOCAL_PREFIX/bin/$bin"
+      detail "Removed $LOCAL_PREFIX/bin/$bin"
+    fi
+  done
+  for dir in "${INSTALLED_DIRS[@]}"; do
+    if [[ -d "$LOCAL_PREFIX/$dir" ]]; then
+      rm -rf "$LOCAL_PREFIX/$dir"
+      detail "Removed $LOCAL_PREFIX/$dir"
+    fi
+  done
+
+  # Remove from global prefix (requires sudo)
+  NEED_SUDO=0
+  for bin in "${INSTALLED_BINS[@]}"; do
+    [[ -e "$GLOBAL_PREFIX/bin/$bin" ]] && NEED_SUDO=1
+  done
+  for dir in "${INSTALLED_DIRS[@]}"; do
+    [[ -d "$GLOBAL_PREFIX/$dir" ]] && NEED_SUDO=1
+  done
+
+  if (( NEED_SUDO )); then
+    info "Removing global installs (requires sudo)..."
+    for bin in "${INSTALLED_BINS[@]}"; do
+      if [[ -e "$GLOBAL_PREFIX/bin/$bin" ]]; then
+        sudo rm -f "$GLOBAL_PREFIX/bin/$bin"
+        detail "Removed $GLOBAL_PREFIX/bin/$bin"
+      fi
+    done
+    for dir in "${INSTALLED_DIRS[@]}"; do
+      if [[ -d "$GLOBAL_PREFIX/$dir" ]]; then
+        sudo rm -rf "$GLOBAL_PREFIX/$dir"
+        detail "Removed $GLOBAL_PREFIX/$dir"
+      fi
+    done
+  fi
+
+  # Remove zsh from /etc/shells if present
+  if grep -qF "$GLOBAL_PREFIX/bin/zsh" /etc/shells 2>/dev/null; then
+    sudo sed -i "\|$GLOBAL_PREFIX/bin/zsh|d" /etc/shells
+    detail "Removed $GLOBAL_PREFIX/bin/zsh from /etc/shells"
+  fi
+
+  # Remove zsh exec line from .bashrc
+  if [[ -f "$HOME/.bashrc" ]] && grep -qF '.local/bin/zsh' "$HOME/.bashrc"; then
+    sed -i '\|.local/bin/zsh|d' "$HOME/.bashrc"
+    detail "Removed zsh exec from ~/.bashrc"
+  fi
+
+  success "Uninstall complete"
+  exit 0
+fi
 
 mkdir -p "$LOG_DIR"
 
@@ -174,8 +244,17 @@ else
   ZSH_PREFIX="$LOCAL_PREFIX"
   INSTALL_ARGS=""
 fi
+(( FORCE_INSTALL )) && INSTALL_ARGS="$INSTALL_ARGS --force"
 
-if command -v zsh &>/dev/null; then
+# Check if we need to install zsh (force mode ignores existing)
+NEED_ZSH=0
+if (( FORCE_INSTALL )); then
+  NEED_ZSH=1
+elif ! command -v zsh &>/dev/null; then
+  NEED_ZSH=1
+fi
+
+if (( ! NEED_ZSH )); then
   detail "zsh: $(command -v zsh)"
   detail "Sourcing $HOME/.zprofile"
   zsh -c "source '$HOME/.zprofile' $INSTALL_ARGS"
