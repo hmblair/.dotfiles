@@ -12,10 +12,15 @@ if [[ -x "$LOCAL_PREFIX/bin/ninja" ]] || _ninja_ok; then
     return 0 2>/dev/null || exit 0
 fi
 
-# Determine platform
+# Determine platform and architecture
 case "$OSTYPE" in
     darwin*)    PLATFORM="mac" ;;
-    linux-gnu*) PLATFORM="linux" ;;
+    linux-gnu*)
+        case "$(uname -m)" in
+            aarch64|arm64) PLATFORM="linux-aarch64" ;;
+            *)             PLATFORM="linux" ;;
+        esac
+        ;;
     *)          echo "Error: Unsupported platform: $OSTYPE"; return 1 2>/dev/null || exit 1 ;;
 esac
 
