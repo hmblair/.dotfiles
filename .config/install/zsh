@@ -17,7 +17,7 @@ done
 VERSION=$(curl -fsSL "https://api.github.com/repos/zsh-users/zsh/tags" | grep -oE '"name": "zsh-[0-9]+\.[0-9]+(\.[0-9]+)?"' | head -1 | sed -E 's/.*"zsh-([^"]+)".*/\1/')
 [[ -z "$VERSION" ]] && VERSION="5.9"
 
-URL="https://sourceforge.net/projects/zsh/files/zsh/${VERSION}/zsh-${VERSION}.tar.gz/download"
+URL="https://sourceforge.net/projects/zsh/files/zsh/${VERSION}/zsh-${VERSION}.tar.xz/download"
 TMPDIR=$(mktemp -d)
 trap "rm -rf '$TMPDIR'" EXIT
 
@@ -26,8 +26,8 @@ mkdir -p "$PREFIX"
 (
     cd "$TMPDIR"
     echo "Downloading zsh ${VERSION}..."
-    curl -fsSL "$URL" -o zsh.tar.gz || exit 1
-    tar xf zsh.tar.gz
+    curl -fsSL -L "$URL" -o zsh.tar.xz || exit 1
+    tar xf zsh.tar.xz
     cd "zsh-${VERSION}"
 
     echo "Configuring..."
