@@ -75,7 +75,7 @@ safe_eval "envs read"
 # Program installation
 # ─────────────────────────────────────────────────────────────────────────────
 
-safe_source "$HOME/.config/install/install" --warn
+safe_source "$HOME/.config/install/install" --warn "$@"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # macOS-specific settings

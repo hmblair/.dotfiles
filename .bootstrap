@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 # Bootstrap script for fresh machines
-# Usage: git clone <repo> ~/.dotfiles && ~/.dotfiles/.bootstrap
+# Usage: git clone <repo> ~/.dotfiles && ~/.dotfiles/.bootstrap [--global]
 
 set -e
+
+# Parse arguments
+GLOBAL_INSTALL=0
+for arg in "$@"; do
+  case "$arg" in
+    --global) GLOBAL_INSTALL=1 ;;
+  esac
+done
 
 # Resolve symlinks to get the actual script location (POSIX-compatible)
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd -P)"
 LOCAL_PREFIX="$HOME/.local"
+GLOBAL_PREFIX="/usr/local"
 LOG_DIR="$LOCAL_PREFIX/log/install"
 
 # Colors
@@ -156,22 +165,34 @@ fi
 # ─────────────────────────────────────────────────────────────────────────────
 
 info "Running shell setup..."
+
+# Determine install prefix for zsh
+if (( GLOBAL_INSTALL )); then
+  ZSH_PREFIX="$GLOBAL_PREFIX"
+  INSTALL_ARGS="--global"
+else
+  ZSH_PREFIX="$LOCAL_PREFIX"
+  INSTALL_ARGS=""
+fi
+
 if command -v zsh &>/dev/null; then
   detail "zsh: $(command -v zsh)"
   detail "Sourcing $HOME/.zprofile"
-  zsh -c "source '$HOME/.zprofile'"
+  zsh -c "source '$HOME/.zprofile' $INSTALL_ARGS"
 else
   # Install zsh first, then run setup
   info "Installing zsh (not found in PATH)..."
   detail "Log: $LOG_DIR/zsh.log"
-  export PREFIX="$LOCAL_PREFIX"
+  export PREFIX="$ZSH_PREFIX"
   export LOCAL_PREFIX
-  export GLOBAL_PREFIX="/usr/local"
+  export GLOBAL_PREFIX
+  export USE_SUDO=$GLOBAL_INSTALL
+  export JOBS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
   if bash "$DOTFILES_DIR/.config/install/zsh" > "$LOG_DIR/zsh.log" 2>&1; then
-    success "zsh installed to $LOCAL_PREFIX/bin/zsh"
-    export PATH="$LOCAL_PREFIX/bin:$PATH"
+    success "zsh installed to $ZSH_PREFIX/bin/zsh"
+    export PATH="$ZSH_PREFIX/bin:$LOCAL_PREFIX/bin:$PATH"
     detail "Sourcing $HOME/.zprofile"
-    "$LOCAL_PREFIX/bin/zsh" -c "source '$HOME/.zprofile'"
+    "$ZSH_PREFIX/bin/zsh" -c "source '$HOME/.zprofile' $INSTALL_ARGS"
   else
     error "Failed to install zsh (see $LOG_DIR/zsh.log)"
     exit 1
