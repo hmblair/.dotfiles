@@ -12,6 +12,14 @@ fi
 
 L_DIR="$PREFIX/share/l"
 
-git clone https://github.com/hmblair/l.git "$L_DIR" || return 1
+# Clone or update existing repo
+if [[ -d "$L_DIR/.git" ]]; then
+    git -C "$L_DIR" pull --ff-only || return 1
+elif [[ -d "$L_DIR" ]]; then
+    rm -rf "$L_DIR"
+    git clone https://github.com/hmblair/l.git "$L_DIR" || return 1
+else
+    git clone https://github.com/hmblair/l.git "$L_DIR" || return 1
+fi
 make -C "$L_DIR" || return 1
 make -C "$L_DIR" install PREFIX="$PREFIX" || return 1
