@@ -38,7 +38,7 @@ mkdir -p "$PREFIX"
 
     echo "Installing to $PREFIX..."
     make install || exit 1
-)
+) || { echo "Build failed"; return 1 2>/dev/null || exit 1; }
 
 # Add zsh exec to .bashrc if not already present (only for local installs)
 if (( ! USE_SUDO )); then
