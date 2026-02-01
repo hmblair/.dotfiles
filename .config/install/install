@@ -51,7 +51,7 @@ declare -A INSTALL_GLOBAL=(
     [nvim]=1
     [oh-my-posh]=0
     [stow]=0
-    [zsh]=0
+    [zsh]=1
     [zsh-plugins]=0
 )
 

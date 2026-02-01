@@ -66,8 +66,14 @@ mkdir -p "$PREFIX"
     make install || exit 1
 ) || { echo "Build failed"; return 1 2>/dev/null || exit 1; }
 
-# Add zsh exec to .bashrc if not already present (only for local installs)
-if (( ! USE_SUDO )); then
+# Post-install setup
+if (( USE_SUDO )); then
+    # Add to /etc/shells for chsh compatibility
+    if ! grep -qF "$PREFIX/bin/zsh" /etc/shells 2>/dev/null; then
+        echo "$PREFIX/bin/zsh" >> /etc/shells
+    fi
+else
+    # Add zsh exec to .bashrc for local installs
     BASHRC="$HOME/.bashrc"
     EXEC_LINE='[ -x "$HOME/.local/bin/zsh" ] && unset PS1 && export MODULESHOME && exec "$HOME/.local/bin/zsh" -l'
 
