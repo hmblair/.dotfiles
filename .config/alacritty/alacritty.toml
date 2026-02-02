@@ -1,3 +1,6 @@
+[terminal]
+  osc52 = "CopyPaste"
+
 [env]
   TERM = "alacritty"
 
