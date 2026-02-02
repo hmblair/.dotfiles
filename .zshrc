@@ -46,7 +46,12 @@ fi
 # Completions
 # ─────────────────────────────────────────────────────────────────────────────
 
-autoload -Uz compinit && compinit
+autoload -Uz compinit
+if [[ $EUID -eq 0 ]]; then
+  compinit -u
+else
+  compinit
+fi
 zstyle ':completion:*:*:argument*' tag-order - '! urls'
 setopt menu_complete
 
