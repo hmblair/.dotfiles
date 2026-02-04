@@ -16,3 +16,6 @@
 
 # Ignore specific files within tracked folders
 .config/nvim/lazy-lock.json
+
+# Neovim tree-sitter parsers
+.local/lib/nvim/
