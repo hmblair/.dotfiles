@@ -13,6 +13,7 @@ for arg in "$@"; do
     --global) GLOBAL_INSTALL=1 ;;
     --force|-f) FORCE_INSTALL=1 ;;
     --uninstall) UNINSTALL=1 ;;
+    *) printf "Unknown option: %s\nUsage: %s [--global] [--force] [--uninstall]\n" "$arg" "$0" >&2; exit 1 ;;
   esac
 done
 
