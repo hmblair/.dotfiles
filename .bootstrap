@@ -162,12 +162,12 @@ fi
 info "Checking prerequisites..."
 
 # Try to load modules for common build tools
-try_load_module gcc    gcc gnu GCC gnu-compilers compiler/gnu
-try_load_module make   gcc gnu GCC gnu-compilers compiler/gnu
-try_load_module perl   perl Perl
-try_load_module curl   curl Curl
-try_load_module git    git Git
-try_load_module tar    tar
+try_load_module gcc    gcc gnu GCC gnu-compilers compiler/gnu || true
+try_load_module make   gcc gnu GCC gnu-compilers compiler/gnu || true
+try_load_module perl   perl Perl || true
+try_load_module curl   curl Curl || true
+try_load_module git    git Git || true
+try_load_module tar    tar || true
 
 MISSING=""
 for cmd in git curl make perl tar; do
