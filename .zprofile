@@ -3,7 +3,7 @@
 #
 # Local customization (not tracked in git):
 #   ~/.paths/      Device-specific PATH entries (one path per line)
-#   ~/.aliases/    Device-specific aliases (sourced by .zshrc)
+#   ~/.aliases     Device-specific aliases (sourced by .zshrc)
 #   ~/.envs/       Device-specific env vars (managed by `envs` command)
 #
 # Use `envs add VAR value` to add environment variables

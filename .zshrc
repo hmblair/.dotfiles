@@ -151,7 +151,7 @@ setopt RM_STAR_SILENT
 safe_source "$HOME/.local/lib/shell/aliases.zsh" --warn
 
 # User-specific aliases (machine-local, not in dotfiles)
-source_dir "$HOME/.aliases"
+safe_source "$HOME/.aliases"
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
