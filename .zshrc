@@ -15,6 +15,15 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Temporary directories (must be in .zshrc for non-login shells like xterm)
+# ─────────────────────────────────────────────────────────────────────────────
+
+export SCDIR="$HOME/scratch"
+export DLDIR="$HOME/downloads"
+temp_symlink "$SCDIR" "scratch"
+temp_symlink "$DLDIR" "downloads"
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Keybindings
 # ─────────────────────────────────────────────────────────────────────────────
 

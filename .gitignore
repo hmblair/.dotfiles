@@ -15,7 +15,9 @@
 !.config/oh-my-posh/
 
 # Ignore specific files within tracked folders
+.config/btop/btop.conf
 .config/nvim/lazy-lock.json
 
 # Neovim tree-sitter parsers
 .local/lib/nvim/
+.local/lib/zsh/
