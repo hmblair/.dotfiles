@@ -69,6 +69,15 @@ safe_eval "envs read"
 safe_source "$HOME/.config/install/install" --warn "$@"
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Temporary directories
+# ─────────────────────────────────────────────────────────────────────────────
+
+export SCDIR="$HOME/scratch"
+export DLDIR="$HOME/downloads"
+temp_symlink "$SCDIR" "scratch"
+temp_symlink "$DLDIR" "downloads"
+
+# ─────────────────────────────────────────────────────────────────────────────
 # macOS-specific settings
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -81,3 +90,5 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   ensure_dir "$SSDIR"
   defaults write com.apple.screencapture location -string "$SSDIR"
 fi
+
+export ZPROFILE_SOURCED=1

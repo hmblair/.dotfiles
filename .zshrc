@@ -1,6 +1,9 @@
 #!/usr/bin/env zsh
 # Interactive shell configuration
 
+# Source .zprofile if not already sourced (e.g., non-login shells like xterm)
+[[ -z "$ZPROFILE_SOURCED" ]] && source "$HOME/.zprofile"
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Shell helpers
 # ─────────────────────────────────────────────────────────────────────────────
@@ -13,15 +16,6 @@ else
   safe_source() { [[ -f "$1" ]] && source "$1"; }
   source_dir() { :; }
 fi
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Temporary directories (must be in .zshrc for non-login shells like xterm)
-# ─────────────────────────────────────────────────────────────────────────────
-
-export SCDIR="$HOME/scratch"
-export DLDIR="$HOME/downloads"
-temp_symlink "$SCDIR" "scratch"
-temp_symlink "$DLDIR" "downloads"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Keybindings
