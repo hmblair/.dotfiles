@@ -49,6 +49,7 @@ fi
 # Completions
 # ─────────────────────────────────────────────────────────────────────────────
 
+[[ -d "$HOME/.local/share/zsh/site-functions" ]] && fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
 autoload -Uz compinit
 if [[ $EUID -eq 0 ]]; then
   compinit -u
@@ -153,22 +154,8 @@ safe_source "$HOME/.local/lib/shell/aliases.zsh" --warn
 # User-specific aliases (machine-local, not in dotfiles)
 safe_source "$HOME/.aliases"
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$("$HOME/mambaforge/bin/conda" 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "$HOME/mambaforge/etc/profile.d/conda.sh" ]; then
-        . "$HOME/mambaforge/etc/profile.d/conda.sh"
-    else
-        export PATH="$HOME/mambaforge/bin:$PATH"
-    fi
-fi
-unset __conda_setup
+# ─────────────────────────────────────────────────────────────────────────────
+# Machine-local overrides (not in dotfiles)
+# ─────────────────────────────────────────────────────────────────────────────
 
-if [ -f "$HOME/mambaforge/etc/profile.d/mamba.sh" ]; then
-    . "$HOME/mambaforge/etc/profile.d/mamba.sh"
-fi
-# <<< conda initialize <<<
-
+safe_source "$HOME/.zshrc.local"

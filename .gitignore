@@ -1,5 +1,6 @@
 .DS_Store
 *.log
+.zshrc.local
 
 # Ignore everything in .config by default
 .config/*
