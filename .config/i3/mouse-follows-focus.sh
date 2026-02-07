@@ -15,18 +15,19 @@ trap 'rm -f "$PIDFILE"' EXIT
 
 i3-msg -t subscribe -m '["window"]' | while read -r event; do
   change=$(echo "$event" | grep -oP '"change"\s*:\s*"\K[^"]+')
-  [[ "$change" != "focus" ]] && continue
-
-  # Save mouse position before getwindowgeometry overwrites X/Y
-  eval "$(xdotool getmouselocation --shell)"
-  mouse_x=$X mouse_y=$Y
+  [[ "$change" != "focus" && "$change" != "move" ]] && continue
 
   win_id=$(xdotool getactivewindow 2>/dev/null) || continue
   eval "$(xdotool getwindowgeometry --shell "$win_id" 2>/dev/null)" || continue
 
-  # If mouse is already inside the window, user probably clicked — skip
-  if (( mouse_x >= X && mouse_x <= X + WIDTH && mouse_y >= Y && mouse_y <= Y + HEIGHT )); then
-    continue
+  # On focus events, skip if mouse is already inside (user probably clicked)
+  if [[ "$change" == "focus" ]]; then
+    eval "$(xdotool getmouselocation --shell 2>/dev/null)"
+    mouse_x=$X mouse_y=$Y
+    eval "$(xdotool getwindowgeometry --shell "$win_id" 2>/dev/null)" || continue
+    if (( mouse_x >= X && mouse_x <= X + WIDTH && mouse_y >= Y && mouse_y <= Y + HEIGHT )); then
+      continue
+    fi
   fi
 
   # Warp to center of focused window
