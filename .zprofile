@@ -17,6 +17,10 @@ export LOCAL_PREFIX="$HOME/.local"
 export GLOBAL_PREFIX="/usr/local"
 export XDG_CONFIG_HOME="$HOME/.config"
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
+if [[ "$OSTYPE" == "linux"* ]]; then
+  export XCURSOR_THEME=Adwaita
+  export XCURSOR_SIZE=48
+fi
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Shell helpers (must come before everything else)
